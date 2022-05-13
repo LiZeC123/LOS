@@ -1,0 +1,6 @@
+# 忽略生成的二进制文件
+mbr.bin
+hd60M.img
+
+# 忽略日志文件
+bochsout.txt
