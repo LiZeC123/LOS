@@ -4,9 +4,14 @@ start:
 	bochs -f bochsrc.disk -q  
 
 # 创建MBR引导文件
-mbr: disk
-	nasm -o mbr.bin boot/mbr.S
+mbr: 
+	nasm -I boot/ -o mbr.bin boot/mbr.S
 	dd if=mbr.bin of=hd60M.img bs=512 count=1 conv=notrunc
+
+# 创建加载器
+loader:
+	nasm -I boot/ -o loader.bin boot/loader.S
+	dd if=loader.bin of=hd60M.img bs=512 count=1 seek=2 conv=notrunc
 
 # 创建一个60M大小的扇区大小为512字节的平坦模式的硬盘文件
 disk:
@@ -14,5 +19,5 @@ disk:
 
 
 clear:
-	rm -rf hd60M.img mbr.bin
+	rm -rf hd60M.img mbr.bin loader.bin
 	
