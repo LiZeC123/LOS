@@ -39,7 +39,7 @@ SECTION MBR vstart=0x7c00
   mov cx, 4                     ; 读取4个扇区
   call rd_disk_m_16
 
-  jmp LOADER_BASE_ADDR          ; 跳转到loader
+  jmp LOADER_BASE_ADDR+0x300    ; 跳转到loader的代码开始位置
 
 ; ---------------------------------------------
 ; 函数：从硬盘读取n个扇区的内容到制定的内存位置

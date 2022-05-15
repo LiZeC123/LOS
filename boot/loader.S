@@ -2,8 +2,6 @@
 
 section loader vstart=LOADER_BASE_ADDR
 LOADER_STACK_TOP equ LOADER_BASE_ADDR
-  jmp loader_start
-
   ; GDT表开始的位置, 第0行为空
   GDT_BASE: dd 0x0000_0000
             dd 0x0000_0000
@@ -22,6 +20,9 @@ LOADER_STACK_TOP equ LOADER_BASE_ADDR
   GDT_LIMIT equ GDT_SIZE - 1
   ; 使用空白预留60个表项的空间
   times 60 dq 0
+  ; 一共定义64个表项，每个占8字节，共消耗2x256 = 0x200 字节
+  ; 因此这里的位置是 LOADER_BASE_ADDR + 0x200
+  total_men_bytes dd 0
 
   ; 定义对应的选择子, 代码段的索引是1, 其他段同理
   SELECTOR_CODE equ (0x0001 << 3) + TI_GDT + RPL0
@@ -32,16 +33,82 @@ LOADER_STACK_TOP equ LOADER_BASE_ADDR
   gdt_ptr dw GDT_LIMIT
           dd GDT_BASE
   
-  loadermsg db '2 loader in real'
+  ; buf和nr占据剩余的空间，使得loader_start对齐在一个整数位置
+  ards_buf times (0x300 -($-$$) - 2) db 0
+  ; 最后两字节表示实际的结构体数量
+  ards_nr dw 0
 
+; LOADER_BASE_ADDR + 0x300
 loader_start:
   mov sp, LOADER_BASE_ADDR
-  mov bp, loadermsg
-  mov cx, 17
-  mov ax, 0x1301
-  mov bx, 0x001f
-  mov dx, 0x1800
-  int 0x10
+
+  xor ebx, ebx
+  mov edx, 0x534d4150
+  mov di, ards_buf
+.e820_mem_get_loop:
+  mov eax, 0x0000e820
+  mov ecx, 20
+  int 0x15
+  jc .e820_failed_so_try_e801
+  add di, cx
+  inc word [ards_nr]
+  cmp ebx, 0
+  jnz .e820_mem_get_loop
+
+  mov cx, [ards_nr]
+  mov ebx, ards_buf
+  xor edx, edx
+.find_max_mem_area:
+  mov eax, [ebx]
+  add eax, [ebx+8]
+  add ebx, 20
+  cmp edx, eax
+  jge .next_ards
+  mov edx, eax
+.next_ards:
+  loop .find_max_mem_area
+  jmp .mem_get_ok
+
+.e820_failed_so_try_e801:
+  mov ax, 0xe801
+  int 0x15
+  jc .e801_failed_so_try_88
+
+  mov cx, 0x400
+  mul cx
+  shl edx, 16
+  and eax, 0x0000_FFFF
+  or edx, eax
+  add edx, 0x10_0000
+  mov esi, edx
+
+  xor eax, eax
+  mov ax, bx
+  mov ecx, 0x1_0000
+  mul ecx
+
+  add esi, eax
+  mov edx, esi
+  jmp .mem_get_ok
+
+.e801_failed_so_try_88:
+  mov ah, 0x88
+  int 0x15
+  jc .error_hlt
+  add eax, 0x0000_FFFF
+
+  mov cx, 0x400
+  mul cx
+  shl edx, 16
+  or edx, eax
+  add edx, 0x10_0000
+  jmp .mem_get_ok
+
+.error_hlt:
+  jmp $
+
+.mem_get_ok:
+  mov [total_men_bytes], edx
 
 ; 准备进入保护模式
 ; 打开A20
