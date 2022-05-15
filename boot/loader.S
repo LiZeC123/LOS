@@ -135,4 +135,22 @@ p_mode_start:
   mov gs, ax
   mov byte [gs:160], "P"
 
+  ; setup_page
+setup_page:
+  mov ecx, 4096
+  mov esi, 0
+.clear_page_dir:
+  mov byte [PAGE_DIR_TABLE_POS + esi], 0
+  inc esi
+  loop .clear_page_dir
+.create_pde:
+  mov eax, PAGE_DIR_TABLE_POS
+  add eax, 0x1000
+  mov ebx, eax
+  
+
+
+
+
+
   jmp $
