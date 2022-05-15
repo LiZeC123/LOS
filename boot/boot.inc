@@ -47,10 +47,10 @@ TI_LDT equ 100b
 ; -------------------- 页表相关属性 -------------------- 
 PAGE_DIR_TABLE_POS equ 0x10_0000  ; 页表加载到内存的1M开始的位置
 
-PG_P equ 1b
-PG_RW_R equ 00b
+PG_P equ 1b         ; 指示页面是否存在
+PG_RW_R equ 00b     ; 指示页面读写权限
 PG_RW_W equ 10b
-PG_US_S equ 000b
+PG_US_S equ 000b    ; 指示页面是用户级还是系统级
 PG_US_U equ 100b
 
 

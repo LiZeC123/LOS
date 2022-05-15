@@ -135,19 +135,85 @@ p_mode_start:
   mov gs, ax
   mov byte [gs:160], "P"
 
-  ; setup_page
+  call setup_page
+
+  sgdt [gdt_ptr]
+
+  mov ebx, [gdt_ptr + 2]
+  or dword [ebx + 0x18 + 4], 0xc000_0000
+
+  add dword [gdt_ptr + 2], 0xc000_0000
+  add esp 0xc000_0000
+; 设置分页目录地址寄存器
+  mov eax, PAGE_DIR_TABLE_POS
+  mov cr3, eax
+; 启用分页机制
+  mov eax, 0x8000_0000
+  mov cr0, eax
+; 重新加载GDT表
+  lgdt [gdt_ptr]
+
+  mov byte [gs:162], "V"
+
+  jmp $
+
+
+; 创建页目录和页表
 setup_page:
+  ; 清空页目录所在内存空间
   mov ecx, 4096
   mov esi, 0
 .clear_page_dir:
   mov byte [PAGE_DIR_TABLE_POS + esi], 0
   inc esi
   loop .clear_page_dir
+; 创建页目录
+; 页目录对应地址中的10bit, 因此需要0x400项, 其中0x0~0x299项分配给用户, 0x300~0x399项分配给内核
+; 整个虚拟地址对应4GB空间, 因此用户使用低3GB空间, 内核使用高1GB空间
+; 每一项需要占据4字节, 因此页目录总共需要0x400 * 4 = 0x1000(4K)字节的空间
 .create_pde:
   mov eax, PAGE_DIR_TABLE_POS
-  add eax, 0x1000
-  mov ebx, eax
+
+  add eax, 0x1000   ; 0x1000=4K
+  mov ebx, eax      ; eax和ebx现在指向页目录后的空闲空间
   
+  or eax, PG_US_U | PG_RW_W | PG_P          ; 给eax附加页面的属性
+  ; 将用户空间的第一项和内核空间的第一项指向同一个页表, 稍后设置该页表的内容
+  mov [PAGE_DIR_TABLE_POS + 4*0x000], eax  
+  mov [PAGE_DIR_TABLE_POS + 4*0x300], eax
+
+  ; 页目录最后一项规定指向自己
+  sub eax, 0x1000             ; eax重新指向页目录的真实物理位置
+  mov [PAGE_DIR_TABLE_POS + 4*0x3ff], eax
+
+; 创建页表项, 映射真实物理内存中低区1M空间的页表项
+; 一个页表也对应10bit地址, 因此也有0x400项, 每一项对应12bit空间, 即4K
+; 页表的每一项也需要4字节, 整个页表同样占据0x1000字节空间
+  mov ecx, 0x100 ; 只映射低区的1M空间, 因此仅分配 1M(0x10_0000) / 4K(0x1000) = 0x100 项
+  mov esi, 0     ; 从0开始映射, 每一项代表4KB空间, 与物理地址一一对应
+  mov edx, PG_US_U | PG_RW_W | PG_P
+.create_pte
+  mov [ebx+esi*4], edx
+  add edx, 0x1000
+  inc esi
+  loop .create_pte
+
+; 给内核的虚拟地址分配页表空间
+; 内核占据高1GB的空间, 为了便于后续的共享, 对这些空间提前分配页表
+  mov eax, PAGE_DIR_TABLE_POS
+  add eax, 0x2000                     ; 页目录占据0x1000字节, 低位的1M空间的页表占据0x1000字节, 此后是可用空间
+  or eax, PG_US_U | PG_RW_W | PG_P
+  mov ebx, PAGE_DIR_TABLE_POS
+  mov ecx, 0x100 - 2  ; 虚拟地址的第一页和最后一页已经做了特殊处理, 所以跳过
+  mov esi, 0x301      ; 从第301项开始映射, 直到最后一项之前
+.create_kernel_pde:
+  mov [ebx+esi*4], eax
+  inc esi 
+  add eax, 0x1000     ; 每个页表需要0x1000字节的空间 
+  loop .create_kernel_pde
+  ret
+  
+
 
 
 
