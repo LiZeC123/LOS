@@ -15,6 +15,10 @@ loader:
 	dd if=loader.bin of=hd60M.img bs=512 count=4 seek=2 conv=notrunc
 	ls -lh loader.bin
 
+kernel:
+	gcc -c -o main.o kernel/main.c
+	ld main.o -Ttext 0xc0001500 -e main -o kernel.bin
+
 # 创建一个60M大小的扇区大小为512字节的平坦模式的硬盘文件
 disk:
 	bximage -q -func="create" -hd=60 -imgmode="flat" -sectsize=512 hd60M.img 
