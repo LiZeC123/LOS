@@ -29,7 +29,7 @@ LOADER_STACK_TOP equ LOADER_BASE_ADDR
   SELECTOR_DATA equ (0x0002 << 3) + TI_GDT + RPL0
   SELECTOR_VIDEO equ (0x0003 << 3) + TI_GDT + RPL0
 
-  ; GDT指针, 与GDTR寄存器的内容一致, 第2字节为LIMIT值, 高4字节为地址值
+  ; GDT指针, 与GDTR寄存器的内容一致, 低2字节为LIMIT值, 高4字节为地址值
   gdt_ptr dw GDT_LIMIT
           dd GDT_BASE
   
@@ -42,6 +42,24 @@ LOADER_STACK_TOP equ LOADER_BASE_ADDR
 loader_start:
   mov sp, LOADER_BASE_ADDR
 
+  call check_mem
+
+; 准备进入保护模式
+; 打开A20
+  in al, 0x92
+  or al, 0000_0010b
+  out 0x92, al 
+; 设置GDT寄存器
+  lgdt [gdt_ptr]
+; CR0寄存器设置PE位
+  mov eax, cr0
+  or eax, 0x00000001
+  mov cr0, eax
+  ; 刷新流水线
+  jmp dword SELECTOR_CODE:p_mode_start
+
+
+check_mem:
   xor ebx, ebx
   mov edx, 0x534d4150
   mov di, ards_buf
@@ -105,24 +123,13 @@ loader_start:
   jmp .mem_get_ok
 
 .error_hlt:
-  jmp $
+  mov edx, -1
+  mov [total_men_bytes], edx
+  ret
 
 .mem_get_ok:
   mov [total_men_bytes], edx
-
-; 准备进入保护模式
-; 打开A20
-  in al, 0x92
-  or al, 0000_0010b
-  out 0x92, al 
-; 设置GDT寄存器
-  lgdt [gdt_ptr]
-; CR0寄存器设置PE位
-  mov eax, cr0
-  or eax, 0x00000001
-  mov cr0, eax
-  ; 刷新流水线
-  jmp dword SELECTOR_CODE:p_mode_start
+  ret
 
 [bits 32]
 p_mode_start:
@@ -143,12 +150,13 @@ p_mode_start:
   or dword [ebx + 0x18 + 4], 0xc000_0000
 
   add dword [gdt_ptr + 2], 0xc000_0000
-  add esp 0xc000_0000
+  add esp, 0xc000_0000
 ; 设置分页目录地址寄存器
   mov eax, PAGE_DIR_TABLE_POS
   mov cr3, eax
 ; 启用分页机制
-  mov eax, 0x8000_0000
+  mov eax, cr0
+  or eax, 0x8000_0000
   mov cr0, eax
 ; 重新加载GDT表
   lgdt [gdt_ptr]
@@ -192,7 +200,7 @@ setup_page:
   mov ecx, 0x100 ; 只映射低区的1M空间, 因此仅分配 1M(0x10_0000) / 4K(0x1000) = 0x100 项
   mov esi, 0     ; 从0开始映射, 每一项代表4KB空间, 与物理地址一一对应
   mov edx, PG_US_U | PG_RW_W | PG_P
-.create_pte
+.create_pte:
   mov [ebx+esi*4], edx
   add edx, 0x1000
   inc esi
