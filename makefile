@@ -1,7 +1,9 @@
 
 # 启动系统
-start: hd60M.img mbr.bin loader.bin kernel.bin
+start: all
 	bochs -f bochsrc.disk -q  
+
+all: hd60M.img mbr.bin loader.bin kernel.bin
 
 # 创建MBR引导文件
 mbr.bin: boot/boot.inc boot/mbr.S 
@@ -15,11 +17,17 @@ loader.bin: boot/boot.inc boot/loader.S
 	dd if=loader.bin of=hd60M.img bs=512 count=4 seek=2 conv=notrunc
 	ls -l loader.bin
 
-kernel.bin: kernel/main.c 
-	gcc -c -m32 -o main.o kernel/main.c
-	ld main.o -Ttext 0xc0001500 -e main -o kernel.bin -m elf_i386
+kernel.bin: main.o print.o
+	ld -Ttext 0xc0001500 -e main -o kernel.bin -m elf_i386 main.o print.o
 	dd if=kernel.bin of=hd60M.img bs=512 count=200 seek=9 conv=notrunc
 	ls -l kernel.bin
+
+main.o: kernel/main.c
+	gcc -c -m32 -o main.o kernel/main.c
+
+print.o: lib/kernel/print.S
+	nasm -f elf -I boot/ -o print.o lib/kernel/print.S
+
 
 # 创建一个60M大小的扇区大小为512字节的平坦模式的硬盘文件
 hd60M.img:
@@ -27,6 +35,7 @@ hd60M.img:
 
 
 clear:
-	rm -rf hd60M.img
-	rm -rf *.bin
+	rm -f hd60M.img
+	rm -f *.bin
+	rm -f *.o
 	
