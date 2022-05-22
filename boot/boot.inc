@@ -54,6 +54,10 @@ PG_US_S equ 000b    ; 指示页面是用户级还是系统级
 PG_US_U equ 100b
 
 
+; -------------------- 内核相关属性 -------------------- 
+KERNEL_START_SECTOR     equ 0x09        ; 内核存储在硬盘的第9个扇区
+KERNEL_BIN_BASE_ADDR    equ 0x7_0000    ; 从这个位置开始, 大约有190KB的可用空间
+KERNEL_ENTRT_POINT      equ 0xc000_1500 ; 内核代码的起始位置, 链接内核的时候需要设置为该值
 
-
-
+PT_NULL equ 0x0 ; 该程序头项为空项目
+PT_LOAD equ 0x1 ; 该程序头项为可加载项

@@ -58,8 +58,11 @@ loader_start:
   ; 刷新流水线
   jmp dword SELECTOR_CODE:p_mode_start
 
-
+; ---------------------------------------------
+; 过程：检查可用内存数量
+; 可用内存的字节数写入total_men_bytes所在位置
 check_mem:
+; ---------------------------------------------
   xor ebx, ebx
   mov edx, 0x534d4150
   mov di, ards_buf
@@ -142,6 +145,12 @@ p_mode_start:
   mov gs, ax
   mov byte [gs:160], "P"
 
+  ; 加载内核到指定位置
+  mov eax, KERNEL_START_SECTOR
+  mov ebx, KERNEL_BIN_BASE_ADDR
+  mov ecx, 200
+  call rd_disk_m_32
+
   call setup_page
 
   sgdt [gdt_ptr]
@@ -163,11 +172,79 @@ p_mode_start:
 
   mov byte [gs:162], "V"
 
-  jmp $
+  ; 进入内核代码
+  jmp SELECTOR_CODE:enter_kernel  ;强制刷新流水线
+enter_kernel:
+  call kernel_init
+  mov esp, 0xc009_f000
+  jmp KERNEL_ENTRT_POINT
 
 
-; 创建页目录和页表
+; ---------------------------------------------
+; 函数：从硬盘读取n个扇区的内容到制定的内存位置
+; eax: LAB扇区号
+; bx : 读取的数据写入到内存的位置
+; cx : 读取的扇区数
+rd_disk_m_32:
+; ---------------------------------------------
+  mov esi, eax
+  mov di, cx  ; di si 是数据相关的寄存器
+; Step1: 设置要读取的扇区数
+  mov dx, 0x1f2
+  mov al, cl
+  out dx, al
+  mov eax, esi
+
+; Step 2: 将LBA地址存入寄存器
+  mov dx, 0x1f3
+  out dx, al
+
+  mov cl, 8
+  shr eax, cl
+  mov dx, 0x1f4
+  out dx, al
+
+  shr eax, cl
+  mov dx, 0x1f5
+  out dx, al
+
+  shr eax, cl
+  and al, 0x0f  ; 最后的4位地址放置到地位
+  or al, 0xe0   ; 高位设置为1110，表示lab模式
+  mov dx, 0x1f6
+  out dx, al
+
+; Step 3: 写入读指令
+  mov dx, 0x1f7
+  mov al, 0x20
+  out dx, al
+
+; Step 4: 检查硬盘状态
+.not_ready:
+  nop
+  in al, dx     ; 状态寄存器和指令寄存器是同一个端口
+  and al, 0x88  ; 获取第3位和第7位的状态
+  cmp al, 0x08  ; 第三位为1表示数据已经准备好， 第7位为1表示硬盘正忙
+  jnz .not_ready
+
+; Step 5: 从端口读取数据
+  mov ax, di    ; 一开始就已经对di赋值，其中是需要读取的扇区数量
+  mov dx, 256   ; 每次可读取2字节，每个扇区512字节
+  mul dx        ; 因此需要读取 di×512/2 = di×256字节
+  mov cx, ax
+  mov dx, 0x1f0
+.go_on_read:
+  in ax, dx
+  mov [ebx], ax     ; 为了加载到超过0xffff的位置, 这里需要使用ebx
+  add ebx, 2
+  loop .go_on_read
+  ret
+
+
+; ---------------------------------------------
+; 过程：创建页目录和页表
 setup_page:
+; ---------------------------------------------
   ; 清空页目录所在内存空间
   mov ecx, 4096
   mov esi, 0
@@ -194,15 +271,17 @@ setup_page:
   sub eax, 0x1000             ; eax重新指向页目录的真实物理位置
   mov [PAGE_DIR_TABLE_POS + 4*0x3ff], eax
 
-; 创建页表项, 映射真实物理内存中低区1M空间的页表项
-; 一个页表也对应10bit地址, 因此也有0x400项, 每一项对应12bit空间, 即4K
-; 页表的每一项也需要4字节, 整个页表同样占据0x1000字节空间
-  mov ecx, 0x100 ; 只映射低区的1M空间, 因此仅分配 1M(0x10_0000) / 4K(0x1000) = 0x100 项
-  mov esi, 0     ; 从0开始映射, 每一项代表4KB空间, 与物理地址一一对应
+; 每一项对应12bit空间, 即4K
+
+; 创建页表项, 一个页表也对应10bit地址, 因此也有0x400项, 每一项需要4字节, 整个页表同样占据0x1000字节空间
+; 首先映射真实物理内存中低区1M空间
+; 页表的每一项表示12bit(即32-10-10)空间, 即每一项表示4K, 所以1M空间需要分配
+  mov ecx, 0x100 ; 所以1M空间需要分配 1M(0x10_0000) / 4K(0x1000) = 0x100 项
+  mov esi, 0     ; 页表项索引
   mov edx, PG_US_U | PG_RW_W | PG_P
 .create_pte:
   mov [ebx+esi*4], edx
-  add edx, 0x1000
+  add edx, 0x1000; 实际的物理地址值
   inc esi
   loop .create_pte
 
@@ -220,11 +299,62 @@ setup_page:
   add eax, 0x1000     ; 每个页表需要0x1000字节的空间 
   loop .create_kernel_pde
   ret
+
+
+; ---------------------------------------------
+; 过程：解析内核文件
+; ---------------------------------------------
+kernel_init:
+  xor eax, eax
+  xor ebx, ebx  ; 执行当前解析的程序头项的位置
+  xor ecx, ecx  ; 记录程序头项的数量
+  xor edx, edx  ; 记录每个程序头项的尺寸
+
+  mov dx, [KERNEL_BIN_BASE_ADDR + 42]   ; 此处是e_phentsize, 表示程序头项的大小
+  mov ebx, [KERNEL_BIN_BASE_ADDR + 28]  ; 此处是e_phoff, 表示程序头项在文件中的偏移值, 理论上应为0x34
+  add ebx, KERNEL_BIN_BASE_ADDR
+  mov cx, [KERNEL_BIN_BASE_ADDR + 44]   ; 此处是e_phnum, 表示有几个程序头项
+
+.each_segment:
+  cmp byte [ebx + 0], PT_LOAD     ; 如果不是可加载项, 则直接跳过
+  jne .PTNULL
+
+  cmp dword [ebx+8], 0xc000_0000  ; 如果需要加载的地址不在内核空间, 则跳过
+  jb .PTNULL                      ; 这种情况是gcc额外添加的段
+
+  ; 开始解析
+  push dword [ebx + 16]           ; 此处为p_filesz, 表示该段的长度
   
+  mov eax, [ebx+4]                ; 此处为p_offset, 表示该段在文件中的偏移值
+  add eax, KERNEL_BIN_BASE_ADDR   ; 相加后即为该段的物理地址
+  push eax
+
+  push dword [ebx+8]              ; 此处为p_vaddr, 即希望该段加载的虚拟地址
+
+  call mem_cpy                    ; 根据上述信息, 将段内的实际数据复制到指定位置
+  add esp, 12
+.PTNULL:
+  add ebx, edx          ; ebx指向下一个程序头项
+  loop .each_segment
+  ret
 
 
+; ---------------------------------------------
+; 函数：逐一拷贝数据
+; 参数: dst, src, size
+mem_cpy:
+; ---------------------------------------------
+  cld
+  push ebp
+  mov ebp, esp
+  push ecx
 
+  mov edi, [ebp + 8]
+  mov esi, [ebp + 12]
+  mov ecx, [ebp + 16]
+  rep movsb
 
+  pop ecx
+  pop ebp
+  ret
 
-
-  jmp $

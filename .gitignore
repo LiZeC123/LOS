@@ -1,7 +1,7 @@
 # 忽略生成的二进制文件
-mbr.bin
-loader.bin
-hd60M.img
+*.bin
+*.img
+*.o
 
 # 忽略日志文件
 bochsout.txt
