@@ -177,7 +177,8 @@ p_mode_start:
 enter_kernel:
   call kernel_init
   mov esp, 0xc009_f000
-  jmp KERNEL_ENTRT_POINT
+  mov eax, [KERNEL_BIN_BASE_ADDR + 24]  ; 此处是e_entry, 表示入口函数的虚拟地址
+  jmp eax
 
 
 ; ---------------------------------------------
