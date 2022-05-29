@@ -8,3 +8,6 @@ bochsout.txt
 
 # 忽略其他配置文件
 .vscode/
+
+# 忽略无关的测试文件
+test.c

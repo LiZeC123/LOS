@@ -1,26 +1,25 @@
+#include "interrupt.h"
 #include "print.h"
 
-void put_str(const char* str, int len) {
-  for (int i = 0; i < len; i++) {
-    put_char(str[i]);
-  }
+
+void init_all() {
+  put_str("init_all\n");
+  idt_init();
 }
 
-void next_line() { put_char('\n'); }
-
 int main() {
-  char str[] = "Hello From Kernel.";
-  const int L = sizeof(str) / sizeof(char) - 1;
-  put_str(str, L);
-  next_line();
+  char str[] = "Hello From Kernel.\n";
+  put_str(str);
 
-  for (int i = 0; i < 30; i++) {
-    put_str("Line ", 5);
-    put_char('1' + i % 10);
-    next_line();
-  }
+  // 初始化所有的模块
+  init_all();
+  
+  // 临时开中断
+  __asm__ __volatile__("sti");
+
 
   while (1) {
+    // 空循环占据CPU, 以免程序退出执行到其他代码
   };
 
   return 0;
