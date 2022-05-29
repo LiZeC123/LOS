@@ -3,32 +3,47 @@
 %define ZERO push 0
 
 extern put_str
+extern idt_table
 
 section .data
-intr_str db "interrupt occur!", 0xa, 0
-
 global intr_entry_table
 intr_entry_table:
 
 %macro VECTOR 2
 section .text
 intr%1entry:
-    %2              ; 中断处理程序, 输出一个字符串
-    push intr_str
-    call put_str
-    add esp, 4
+    %2              ; 根据情况填充数据
+
+    push ds         ; 保存上下文环境
+    push es
+    push fs
+    push gs
+    pushad
 
     mov al, 0x20    ; 向主片和从片发送EOI, 表示中断处理结束
     out 0xa0, al
     out 0x20, al
 
-    add esp, 4      ; 跳过error_code
-    iret    
+    push %1                     ; 压入中断向量号, 方便调试
+    call [idt_table + %1 * 4]   ; 根据中断向量跳转到C的处理函数之中
+    jmp intr_exit               ; 恢复环境
 
 section .data
-    dd intr%1entry
+    dd intr%1entry  ; 存储中断向量入口地址
 
 %endmacro
+
+section .text
+global intr_exit
+intr_exit:
+    add esp, 4
+    popad
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    add esp, 4      ; 跳过错误码
+    iretd
 
 
 VECTOR 0x00, ZERO

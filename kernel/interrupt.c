@@ -25,11 +25,18 @@ static GateDesc idt[IDT_DESC_CNT];
 
 typedef void* intr_handler;
 
+char* intr_name[IDT_DESC_CNT];  // 保存异常的名字
+
 extern intr_handler
     intr_entry_table[IDT_DESC_CNT];  // 引用kernel.S中定义的中断向量入口数组
 
-static void make_idt_desc(GateDesc* p_gdesc, uint8_t attr, intr_handler function) {
+intr_handler idt_table[IDT_DESC_CNT];  // C语言实现的中断处理函数的列表,
+// 发生中断时进入intr_entry_table,
+// 通过汇编代码保存环境后根据中断号计算idt_table的偏移量并跳转执行
+// 因此在idt_table需要填入合适的函数地址
 
+static void make_idt_desc(GateDesc* p_gdesc, uint8_t attr,
+                          intr_handler function) {
   p_gdesc->func_offset_low_word = (uint32_t)function & 0x0000ffff;
   p_gdesc->selector = SELECTOR_K_CODE;
   p_gdesc->dcount = 0;
@@ -43,6 +50,48 @@ static void idt_desc_init() {
     make_idt_desc(&idt[i], IDT_DESC_ATTR_DPL0, intr_entry_table[i]);
   }
   put_str("  idt_desc_init done\n");
+}
+
+static void general_intr_handler(uint8_t vec_nr) {
+  if (vec_nr == 0x27 || vec_nr == 0x2f) {
+    return;
+  }
+  put_str("int vector: ");
+  print_number(vec_nr);
+  put_str(" ");
+  put_str(intr_name[vec_nr]);
+  next_line();
+}
+
+static void exception_init(void) {
+  int i;
+  for (i = 0; i < IDT_DESC_CNT; i++) {
+    // 先将所有的中断统一处理
+    idt_table[i] = general_intr_handler;
+    intr_name[i] = "unknown";
+  }
+
+  // 然后根据规则赋予实际的值
+  intr_name[0] = "#DE Divide Error";
+  intr_name[1] = "#DB Debug Exception";
+  intr_name[2] = "NMI Interrupt";
+  intr_name[3] = "#BP Breakpoint Exception";
+  intr_name[4] = "#OF Overflow Exception";
+  intr_name[5] = "#BR BOUND Range Exceeded Exception";
+  intr_name[6] = "#UD Invalid Opcode Exception";
+  intr_name[7] = "#NM Device No七 Available Exception";
+  intr_name[8] = "JIDF Double Fault Exception";
+  intr_name[9] = "Coprocessor Segment Overrun";
+  intr_name[10] = "#TS Invalid TSS Exception";
+  intr_name[11] = "#NP Segment Not Present";
+  intr_name[12] = "#SS Stack Fault Exception";
+  intr_name[13] = "#GP General Protection Exception";
+  intr_name[14] = "#PF Page-Fault Exception";
+  // intr_name[l5]第15项是intel保留项，未使用
+  intr_name[16] = "#MF x87 FPU F'loating-Point Error";
+  intr_name[17] = "#AC Alignment Check Exception";
+  intr_name[18] = "#MC Machine-Check Exception";
+  intr_name[19] = "#XF SIMD Floating-Point Exception";
 }
 
 // 初始化8259A
@@ -66,6 +115,7 @@ static void pic_init() {
 void idt_init() {
   put_str("idt_init start\n");
   idt_desc_init();
+  exception_init();
   pic_init();
 
   // idt数组变量实际上就是一个地址值

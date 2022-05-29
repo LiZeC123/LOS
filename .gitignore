@@ -2,6 +2,7 @@
 *.bin
 *.img
 *.o
+a.out
 
 # 忽略日志文件
 bochsout.txt

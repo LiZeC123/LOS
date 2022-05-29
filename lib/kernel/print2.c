@@ -7,6 +7,10 @@ void put_str(const char* str) {
 void next_line() { put_char('\n'); }
 
 void print_number(uint64_t num) {
+  if(num == 0) {
+    put_str("0x0");
+  }
+
   char buf[19];
 
   int idx = 17;
@@ -23,9 +27,12 @@ void print_number(uint64_t num) {
     num /= 16;
   }
 
-  buf[0] = '0';
-  buf[1] = 'x';
+  idx = 2;
+  while (buf[idx++] == '0');
+  idx -= 3;
+  buf[idx+0] = '0';
+  buf[idx+1] = 'x';
   buf[18] = '\0';
 
-  put_str(buf);
+  put_str(&buf[idx]);
 }
