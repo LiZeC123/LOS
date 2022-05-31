@@ -1,5 +1,6 @@
 #include "interrupt.h"
 #include "print.h"
+#include "debug.h"
 
 
 void init_all() {
@@ -14,8 +15,6 @@ int main() {
   // 初始化所有的模块
   init_all();
   
-  // 临时开中断
-  __asm__ __volatile__("sti");
 
 
   while (1) {

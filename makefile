@@ -1,5 +1,6 @@
 
 WARNFLG = -Wall -Wextra
+# 使用 -D NODEBUG 可以关闭ASSERT
 DEBUG = -g
 STD = -std=c11
 CFLAGS += $(DEBUG) $(WARNFLG) $(STD) -m32 -fno-stack-protector
@@ -23,7 +24,7 @@ loader.bin: boot/loader.S boot/boot.inc
 	dd $(DDFLAGS)  if=$@ count=4 seek=2
 
 # 创建内核
-kernel.bin: main.o kernel.o interrupt.o print.o print2.o
+kernel.bin: main.o kernel.o interrupt.o debug.o print.o print2.o
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 
@@ -34,6 +35,9 @@ kernel.o: kernel/kernel.S
 	nasm -f elf -I boot/ -o $@ $^
 
 main.o: kernel/main.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+debug.o: kernel/debug.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 print.o: lib/kernel/print.S

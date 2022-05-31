@@ -3,6 +3,7 @@
 #include "global.h"
 #include "io.h"
 #include "print.h"
+#include "interrupt.h"
 
 #define IDT_DESC_CNT 0x21
 
@@ -79,7 +80,7 @@ static void exception_init(void) {
   intr_name[4] = "#OF Overflow Exception";
   intr_name[5] = "#BR BOUND Range Exceeded Exception";
   intr_name[6] = "#UD Invalid Opcode Exception";
-  intr_name[7] = "#NM Device No七 Available Exception";
+  intr_name[7] = "#NM Device Not Available Exception";
   intr_name[8] = "JIDF Double Fault Exception";
   intr_name[9] = "Coprocessor Segment Overrun";
   intr_name[10] = "#TS Invalid TSS Exception";
@@ -111,6 +112,41 @@ static void pic_init() {
 
   put_str("  pic_init done\n");
 }
+
+
+
+#define EFLAGS_IF 0x00000200
+#define GET_EFLAGS(EFLAG_VAR) __asm__ __volatile__ ("pushfl; popl %0": "=g"(EFLAG_VAR))
+
+
+IntrStatus intr_get_status() {
+  uint32_t eflags = 0;
+  GET_EFLAGS(eflags);
+  return (EFLAGS_IF & eflags) ? INTR_ON : INTR_OFF;
+}
+
+IntrStatus intr_enable() {
+  if(INTR_ON == intr_get_status()) {
+    return INTR_ON;
+  } else {
+    __asm__ __volatile__ ("sti");
+    return INTR_OFF;
+  }
+}
+
+IntrStatus intr_disable() {
+  if(INTR_ON == intr_get_status()) {
+    __asm__ __volatile__ ("cli": : : "memory");
+    return INTR_ON;
+  } else {
+    return INTR_OFF;
+  }
+}
+
+IntrStatus intr_set_status(IntrStatus status) {
+  return status & INTR_ON ? intr_enable() : intr_disable();
+}
+
 
 void idt_init() {
   put_str("idt_init start\n");
