@@ -3,6 +3,7 @@
 *.img
 *.o
 a.out
+test/*.out
 
 # 忽略日志文件
 bochsout.txt

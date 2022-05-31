@@ -3,7 +3,7 @@ WARNFLG = -Wall -Wextra
 # 使用 -D NODEBUG 可以关闭ASSERT
 DEBUG = -g
 STD = -std=c11
-CFLAGS += $(DEBUG) $(WARNFLG) $(STD) -m32 -fno-stack-protector
+CFLAGS += $(DEBUG) $(WARNFLG) $(STD) -m32 -fno-stack-protector -fno-builtin
 CC = gcc
 DDFLAGS = of=hd60M.img bs=512 conv=notrunc
 
@@ -24,9 +24,15 @@ loader.bin: boot/loader.S boot/boot.inc
 	dd $(DDFLAGS)  if=$@ count=4 seek=2
 
 # 创建内核
-kernel.bin: main.o kernel.o interrupt.o debug.o print.o print2.o
+kernel.bin: main.o kernel.o bitmap.o interrupt.o string.o debug.o print2.o print.o 
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
+
+bitmap.o: kernel/bitmap.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+debug.o: kernel/debug.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
 
 interrupt.o: kernel/interrupt.c
 	$(CC) $(CFLAGS) -c -o $@ $^
@@ -37,7 +43,7 @@ kernel.o: kernel/kernel.S
 main.o: kernel/main.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-debug.o: kernel/debug.c	
+string.o: kernel/string.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 print.o: lib/kernel/print.S
@@ -53,7 +59,6 @@ hd60M.img:
 
 
 clear:
-	rm -f hd60M.img
 	rm -f *.bin
 	rm -f *.o
 	
