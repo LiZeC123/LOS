@@ -1,3 +1,7 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #define PAINC(...) assert(__FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define ASSERT(COND)                                                           \
