@@ -13,4 +13,8 @@ void painc_spin(const char* filename, int line, const char* func,
   } else {           \
     PAINC(#COND);    \
   }
+
+
+#define NULL ((void *)0)
+
 #endif
