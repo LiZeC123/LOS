@@ -7,14 +7,14 @@
 
 // 初始化位图
 void bitmap_init(BitMap *m) {
-  ASSERT(m != NULL || m->btmp_bytes_len < 0);
+  ASSERT(m != NULL);
 
   memset(m->bits, 0, m->btmp_bytes_len);
 }
 
 // 判断给定位置是否为1
 bool bitmap_scan_test(BitMap *m, uint32_t idx) {
-  ASSERT(m != NULL || idx < 0 || m->btmp_bytes_len * 8 < idx);
+  ASSERT(m != NULL || m->btmp_bytes_len * 8 < idx);
 
   uint32_t byte_idx = idx / 8;
   uint32_t bit_idx = idx % 8;
@@ -70,7 +70,7 @@ int bitmap_scan(BitMap *m, uint32_t cnt) {
 
 // 设置位图给定位置的值
 void bitmap_set(BitMap *m, uint32_t idx, int8_t value) {
-  ASSERT(m != NULL || idx < 0 || m->btmp_bytes_len * 8 < idx);
+  ASSERT(m != NULL || m->btmp_bytes_len * 8 < idx);
   ASSERT((value == 0) || (value == 1));
 
   uint32_t byte_idx = idx / 8;
