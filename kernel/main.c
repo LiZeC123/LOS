@@ -18,6 +18,15 @@ int main() {
   
   put_str("Hello From Kernel.\n");
 
+  void* addr = get_kernel_pages(3);
+
+  PRINTLINE("Get Kernel Page Start vaddr is ", (uint32_t)addr);
+
+  addr = get_kernel_pages(3);
+
+  PRINTLINE("Get Kernel Page Start vaddr is ", (uint32_t)addr);
+  
+
   while (1) {
     // 空循环占据CPU, 以免程序退出执行到其他代码
   };
