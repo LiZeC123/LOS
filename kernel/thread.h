@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "list.h"
 
 typedef void thread_func(void *);
 
@@ -57,6 +58,14 @@ typedef struct {
   TaskStatus status;
   uint8_t priority;
   char name[16];
+
+  uint8_t ticks;
+  uint32_t elapsed_ticks;
+
+  ListElem general_tag;   
+  ListElem all_list_tag;
+  uint32_t* pgdir;    // 进程自己的页表的虚拟地址
+
   uint32_t stack_magic;
 } TaskStruct;
 
@@ -64,3 +73,9 @@ typedef struct {
 
 
 TaskStruct *thread_start(char *name, int prio, thread_func func, void *args);
+
+TaskStruct *running_thread();
+
+void schedule();
+
+void thread_init();

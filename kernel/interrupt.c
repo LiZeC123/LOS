@@ -1,9 +1,7 @@
-#include <stdint.h>
-
+#include "interrupt.h"
 #include "global.h"
 #include "io.h"
 #include "print.h"
-#include "interrupt.h"
 
 #define IDT_DESC_CNT 0x21
 
@@ -24,19 +22,17 @@ typedef struct {
 // 中断描述符表
 static GateDesc idt[IDT_DESC_CNT];
 
-typedef void* intr_handler;
-
-char* intr_name[IDT_DESC_CNT];  // 保存异常的名字
+char *intr_name[IDT_DESC_CNT]; // 保存异常的名字
 
 extern intr_handler
-    intr_entry_table[IDT_DESC_CNT];  // 引用kernel.S中定义的中断向量入口数组
+    intr_entry_table[IDT_DESC_CNT]; // 引用kernel.S中定义的中断向量入口数组
 
-intr_handler idt_table[IDT_DESC_CNT];  // C语言实现的中断处理函数的列表,
+intr_handler idt_table[IDT_DESC_CNT]; // C语言实现的中断处理函数的列表,
 // 发生中断时进入intr_entry_table,
 // 通过汇编代码保存环境后根据中断号计算idt_table的偏移量并跳转执行
 // 因此在idt_table需要填入合适的函数地址
 
-static void make_idt_desc(GateDesc* p_gdesc, uint8_t attr,
+static void make_idt_desc(GateDesc *p_gdesc, uint8_t attr,
                           intr_handler function) {
   p_gdesc->func_offset_low_word = (uint32_t)function & 0x0000ffff;
   p_gdesc->selector = SELECTOR_K_CODE;
@@ -62,6 +58,16 @@ static void general_intr_handler(uint8_t vec_nr) {
   put_str(" ");
   put_str(intr_name[vec_nr]);
   next_line();
+
+  if (vec_nr == 14) {
+    int page_fault_vaddr = 0;
+    __asm__("movl %%cr2, %0" : "=r"(page_fault_vaddr));
+    PRINTLINE("Page Fault Addr is ", page_fault_vaddr);
+  }
+
+  while (1) {
+    // 需要处理的中断都会单独处理, 如果出现其他情况, 则停住以便于调试
+  }
 }
 
 static void exception_init(void) {
@@ -95,6 +101,10 @@ static void exception_init(void) {
   intr_name[19] = "#XF SIMD Floating-Point Exception";
 }
 
+void register_handler(uint8_t vector_no, intr_handler function) {
+  idt_table[vector_no] = function;
+}
+
 // 初始化8259A
 static void pic_init() {
   outb(PIC_M_CTRL, 0x11);
@@ -113,11 +123,9 @@ static void pic_init() {
   put_str("  pic_init done\n");
 }
 
-
-
 #define EFLAGS_IF 0x00000200
-#define GET_EFLAGS(EFLAG_VAR) __asm__ __volatile__ ("pushfl; popl %0": "=g"(EFLAG_VAR))
-
+#define GET_EFLAGS(EFLAG_VAR)                                                  \
+  __asm__ __volatile__("pushfl; popl %0" : "=g"(EFLAG_VAR))
 
 IntrStatus intr_get_status() {
   uint32_t eflags = 0;
@@ -126,17 +134,17 @@ IntrStatus intr_get_status() {
 }
 
 IntrStatus intr_enable() {
-  if(INTR_ON == intr_get_status()) {
+  if (INTR_ON == intr_get_status()) {
     return INTR_ON;
   } else {
-    __asm__ __volatile__ ("sti");
+    __asm__ __volatile__("sti");
     return INTR_OFF;
   }
 }
 
 IntrStatus intr_disable() {
-  if(INTR_ON == intr_get_status()) {
-    __asm__ __volatile__ ("cli": : : "memory");
+  if (INTR_ON == intr_get_status()) {
+    __asm__ __volatile__("cli" : : : "memory");
     return INTR_ON;
   } else {
     return INTR_OFF;
@@ -146,7 +154,6 @@ IntrStatus intr_disable() {
 IntrStatus intr_set_status(IntrStatus status) {
   return status & INTR_ON ? intr_enable() : intr_disable();
 }
-
 
 void idt_init() {
   put_str("idt_init start\n");

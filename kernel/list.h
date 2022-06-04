@@ -3,6 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define offset(type, member) (int)(&((type *)0)->member)
+#define elem2entry(type, member, elem_ptr)                                     \
+  (type *)((int)elem_ptr - offset(type, member))
+
 struct _list_elem {
   struct _list_elem *prev;
   struct _list_elem *next;
