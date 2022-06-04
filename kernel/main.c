@@ -1,4 +1,5 @@
 #include "interrupt.h"
+#include "time.h"
 #include "memory.h"
 #include "print.h"
 #include "debug.h"
@@ -7,6 +8,7 @@
 void init_all() {
   put_str("init_all...\n");
   idt_init();
+  time_init();
   mem_init();
 }
 
@@ -26,6 +28,7 @@ int main() {
 
   PRINTLINE("Get Kernel Page Start vaddr is ", (uint32_t)addr);
   
+  intr_enable();
 
   while (1) {
     // 空循环占据CPU, 以免程序退出执行到其他代码

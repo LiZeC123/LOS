@@ -24,7 +24,7 @@ loader.bin: boot/loader.S boot/boot.inc
 	dd $(DDFLAGS)  if=$@ count=4 seek=2
 
 # 创建内核
-kernel.bin: main.o kernel.o bitmap.o interrupt.o memory.o string.o debug.o print2.o print.o 
+kernel.bin: main.o kernel.o bitmap.o interrupt.o time.o memory.o string.o debug.o print2.o print.o 
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 
@@ -47,6 +47,9 @@ memory.o: kernel/memory.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 string.o: kernel/string.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+time.o: kernel/time.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 print.o: lib/kernel/print.S
