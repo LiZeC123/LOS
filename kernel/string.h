@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 
 // 从dst开始的size字节设置为value
 void memset(void* dst, uint8_t value, uint32_t size);

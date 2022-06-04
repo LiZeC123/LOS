@@ -1,5 +1,5 @@
-#include "test.h"
 #include "../kernel/string.h"
+#include "test.h"
 
 void test_memset() {
   char arr[] = {
@@ -28,7 +28,7 @@ void test_memcpy() {
   ASSERT(arr[0] == 0xffffdede);
   ASSERT(arr[5] == 0x0a0a0a0a);
   for (unsigned int i = 1; i < 5; i++) {
-    ASSERT(arr[i] == brr[i-1]);
+    ASSERT(arr[i] == brr[i - 1]);
   }
 }
 
@@ -130,7 +130,6 @@ void test_strchrs() {
   ASSERT(strchrs(str, 's') == 3);
   ASSERT(strchrs(str, 'a') == 3);
   ASSERT(strchrs(str, 't') == 2);
-
 }
 
 int main() {
