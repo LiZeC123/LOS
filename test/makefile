@@ -6,14 +6,18 @@ CFLAGS += $(DEBUG) $(WARNFLG) $(STD) -m32 -fno-stack-protector -fno-builtin
 CC = gcc
 DDFLAGS = of=hd60M.img bs=512 conv=notrunc
 
-all: bitmap string
+all: bitmap list string
 
 bitmap:
-	$(CC) $(CFLAGS) -o $@.out test_bitmap.c ../kernel/bitmap.c 
+	$(CC) $(CFLAGS) -o $@.out test_$@.c ../kernel/$@.c 
+	./$@.out
+
+list:
+	$(CC) $(CFLAGS) -o $@.out test_$@.c ../kernel/$@.c 
 	./$@.out
 
 string:
-	$(CC) $(CFLAGS) -o $@.out test_string.c ../kernel/string.c 
+	$(CC) $(CFLAGS) -o $@.out test_$@.c ../kernel/$@.c 
 	./$@.out
 
 clear:
