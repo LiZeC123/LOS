@@ -39,8 +39,12 @@ int main() {
 
   intr_enable();
 
-  thread_start("k_thread_a", 31, k_thread_a, "OOOO ");
-  thread_start("k_thread_b", 8, k_thread_b, "XXXX ");
+  thread_start("a", 31, k_thread_a, "aaa ");
+  thread_start("b", 8, k_thread_a, "bbb ");
+  thread_start("c", 14, k_thread_a, "ccc ");
+  thread_start("d", 21, k_thread_a, "ddd ");
+  thread_start("e", 17, k_thread_a, "eee ");
+  thread_start("f", 5, k_thread_a, "fff ");
 
   while (1) {
     console_put_str("Main ");
