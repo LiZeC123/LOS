@@ -1,8 +1,5 @@
 #include "bitmap.h"
-
 #include "debug.h"
-#include "interrupt.h"
-#include "print.h"
 #include "string.h"
 
 // 初始化位图

@@ -3,6 +3,7 @@
 *.img
 *.o
 a.out
+a.txt
 test/*.out
 
 # 忽略日志文件

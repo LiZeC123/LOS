@@ -4,7 +4,6 @@
 #include "memory.h"
 #include "print.h"
 #include "string.h"
-#include <stdint.h>
 
 #define PG_SIZE 4096
 
@@ -129,4 +128,32 @@ void thread_init() {
 
   make_main_thread();
   put_str("thread_init done\n");
+}
+
+void thread_block(TaskStatus stat) {
+  ASSERT(stat == TASK_BLOCKED || stat == TASK_WAITING || stat == TASK_HANGING);
+
+  IntrStatus old_status = intr_disable();
+  TaskStruct *cur_thread = running_thread();
+  cur_thread->status = stat;
+
+  schedule(); // 执行调度, 从而将当前线程换下处理器
+
+  // 从阻塞解除后才能执行后续的代码
+  intr_set_status(old_status);
+}
+
+void thread_unblock(TaskStruct *pthread) {
+  IntrStatus old_status = intr_disable();
+
+  TaskStatus stat = pthread->status;
+  ASSERT(stat == TASK_BLOCKED || stat == TASK_WAITING || stat == TASK_HANGING);
+
+  if (stat != TASK_READY) {
+    ASSERT(!list_find(&thread_ready_list, &pthread->general_tag));
+    list_push(&thread_ready_list, &pthread->general_tag);
+    pthread->status = TASK_READY;
+  }
+
+  intr_set_status(old_status);
 }

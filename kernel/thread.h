@@ -79,3 +79,7 @@ TaskStruct *running_thread();
 void schedule();
 
 void thread_init();
+
+void thread_block(TaskStatus stat);
+
+void thread_unblock(TaskStruct *pthread);
