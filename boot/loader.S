@@ -254,13 +254,13 @@ setup_page:
   inc esi
   loop .clear_page_dir
 ; 创建页目录
-; 页目录对应地址中的10bit, 因此需要0x400项, 其中0x0~0x299项分配给用户, 0x300~0x399项分配给内核
+; 页目录对应地址中的10bit, 因此需要0x400项, 其中0x0~0x2ff项分配给用户, 0x300~0x3ff项分配给内核
 ; 整个虚拟地址对应4GB空间, 因此用户使用低3GB空间, 内核使用高1GB空间
 ; 每一项需要占据4字节, 因此页目录总共需要0x400 * 4 = 0x1000(4K)字节的空间
 .create_pde:
   mov eax, PAGE_DIR_TABLE_POS
 
-  add eax, 0x1000   ; 0x1000=4K
+  add eax, 0x1000   ; 移动到页目录表末尾
   mov ebx, eax      ; eax和ebx现在指向页目录后的空闲空间
   
   or eax, PG_US_U | PG_RW_W | PG_P          ; 给eax附加页面的属性
