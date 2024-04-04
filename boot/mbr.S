@@ -5,12 +5,12 @@
 ; ----------------------
 ; vstart指令要求编译器将此处的地址假定为0x7c00，后续计算位置时都以此为基准
 SECTION MBR vstart=0x7c00
-  mov ax, cs
-  mov ds, ax
+  mov ax, cs      ; BIOS 执行 JMP 0:7C00 进入MBR, 此时CS为0
+  mov ds, ax      ; 因此可利用此代码将其他段寄存器也重置为0
   mov es, ax
   mov ss, ax
   mov fs, ax
-  mov sp, 0x7c00
+  mov sp, 0x7c00  ; 栈向低位增长, 直到0x4FF均为可用空间
   mov ax, 0xb800  ; 显示器映射内存的位置
   mov gs, ax
 
@@ -22,6 +22,7 @@ SECTION MBR vstart=0x7c00
   mov dx, 0x184f
   int 0x10
 
+; 向显存写入字符, 每个字符位置使用两个字节, 一个字节表示字符, 一个字节表示颜色
   mov byte [gs:0x00], 'L'
   mov byte [gs:0x01], 0xA4
 
@@ -42,7 +43,7 @@ SECTION MBR vstart=0x7c00
   jmp LOADER_BASE_ADDR+0x300    ; 跳转到loader的代码开始位置
 
 ; ---------------------------------------------
-; 函数：从硬盘读取n个扇区的内容到制定的内存位置
+; 函数：从硬盘读取n个扇区的内容到指定的内存位置
 ; eax: LAB扇区号
 ; bx : 读取的数据写入到内存的位置
 ; cx : 读取的扇区数
@@ -105,4 +106,4 @@ rd_disk_m_16:
   ; $是当前地址， $$是这一段的开始地址, 因此($-$$)就是上面的代码已经占据的字节数
   ; 因此这行代码就是用0填充剩余的空间，使得整个程序最终占据512字节 
   times 510-($-$$) db 0 
-  db 0x55, 0xaa
+  db 0x55, 0xaa     ; 为了避免错误, MBR对应的扇区的最后两个字节必须为0x55和0xAA
