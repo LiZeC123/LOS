@@ -38,7 +38,7 @@ LOADER_STACK_TOP equ LOADER_BASE_ADDR
   ; 最后两字节表示实际的结构体数量
   ards_nr dw 0
 
-; LOADER_BASE_ADDR + 0x300
+; LOADER_BASE_ADDR + 0x300 = 0xC00
 loader_start:
   mov sp, LOADER_BASE_ADDR
 
@@ -246,7 +246,7 @@ rd_disk_m_32:
 ; 过程：创建页目录和页表
 setup_page:
 ; ---------------------------------------------
-  ; 清空页目录所在内存空间
+; 清空页目录所在内存空间
   mov ecx, 4096
   mov esi, 0
 .clear_page_dir:
@@ -254,14 +254,14 @@ setup_page:
   inc esi
   loop .clear_page_dir
 ; 创建页目录
-; 页目录对应地址中的10bit, 因此需要0x400项, 其中0x0~0x2ff项分配给用户, 0x300~0x3ff项分配给内核
+; 页目录对应地址中的10bit, 因此需要0x400项, 其中 0x0~0x2ff 项分配给用户, 0x300~0x3ff 项分配给内核
 ; 整个虚拟地址对应4GB空间, 因此用户使用低3GB空间, 内核使用高1GB空间
-; 每一项需要占据4字节, 因此页目录总共需要0x400 * 4 = 0x1000(4K)字节的空间
+; 页目录每一项占据4字节, 页目录表正好使用0x400 * 4 = 0x1000(4K)字节的空间
 .create_pde:
   mov eax, PAGE_DIR_TABLE_POS
 
   add eax, 0x1000   ; 移动到页目录表末尾
-  mov ebx, eax      ; eax和ebx现在指向页目录后的空闲空间
+  mov ebx, eax      ; eax和ebx现在指向页目录后的空闲空间, 即第一个页表项的起始位置
   
   or eax, PG_US_U | PG_RW_W | PG_P          ; 给eax附加页面的属性
   ; 将用户空间的第一项和内核空间的第一项指向同一个页表, 稍后设置该页表的内容
@@ -272,17 +272,14 @@ setup_page:
   sub eax, 0x1000             ; eax重新指向页目录的真实物理位置
   mov [PAGE_DIR_TABLE_POS + 4*0x3ff], eax
 
-; 每一项对应12bit空间, 即4K
-
 ; 创建页表项, 一个页表也对应10bit地址, 因此也有0x400项, 每一项需要4字节, 整个页表同样占据0x1000字节空间
 ; 首先映射真实物理内存中低区1M空间
-; 页表的每一项表示12bit(即32-10-10)空间, 即每一项表示4K, 所以1M空间需要分配
-  mov ecx, 0x100 ; 所以1M空间需要分配 1M(0x10_0000) / 4K(0x1000) = 0x100 项
+  mov ecx, 0x100 ; 每一页大小为4KB, 因此1M空间需要分配 1M(0x10_0000) / 4K(0x1000) = 0x100 项
   mov esi, 0     ; 页表项索引
-  mov edx, PG_US_U | PG_RW_W | PG_P
+  mov edx, PG_US_U | PG_RW_W | PG_P ; 真实物理地址从0开始
 .create_pte:
-  mov [ebx+esi*4], edx
-  add edx, 0x1000; 实际的物理地址值
+  mov [ebx+esi*4], edx              ; ebx在上一步指向了页目录的末尾, 也即页表的起始位置
+  add edx, 0x1000                   ; 实际的物理地址值, 每次增加4K
   inc esi
   loop .create_pte
 
