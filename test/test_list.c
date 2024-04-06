@@ -2,11 +2,11 @@
 #include "../kernel/list.h"
 #include "test.h"
 
+// Mock 中断相关的函数
 IntrStatus intr_disable() { return INTR_OFF; }
-
 IntrStatus intr_set_status(IntrStatus v) { return v; }
 
-int main() {
+void test_base() {
   List list;
 
   list_init(&list);
@@ -48,4 +48,29 @@ int main() {
 
   ASSERT(list_empty(&list));
   ASSERT(list_len(&list) == 0);
+}
+
+void test_push_and_pop() {
+  List list;
+  list_init(&list);
+
+  ListElem *elemA = (ListElem *)malloc(sizeof(ListElem));
+  ListElem *elemB = (ListElem *)malloc(sizeof(ListElem));
+  ListElem *elemC = (ListElem *)malloc(sizeof(ListElem));
+
+  list_append(&list, elemA);
+  list_append(&list, elemB);
+  list_append(&list, elemC);
+
+  for (int i=0; i < 100;i++) {
+    ListElem *e = list_pop(&list);
+    list_append(&list, e);
+  }
+  
+  ASSERT(list_len(&list) == 3);
+}
+
+int main() {
+  test_base();
+  test_push_and_pop();
 }
