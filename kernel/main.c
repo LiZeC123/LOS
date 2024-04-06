@@ -37,14 +37,11 @@ int main() {
 
   put_str("Hello From Kernel.\n");
 
-  intr_enable();
+  thread_start("Thread-01", 31, k_thread_a, "argA ");
+  thread_start("Thread-02", 8, k_thread_b, "argB ");
 
-  thread_start("a", 31, k_thread_a, "aaa ");
-  thread_start("b", 8, k_thread_a, "bbb ");
-  thread_start("c", 14, k_thread_a, "ccc ");
-  thread_start("d", 21, k_thread_a, "ddd ");
-  thread_start("e", 17, k_thread_a, "eee ");
-  thread_start("f", 5, k_thread_a, "fff ");
+  // 准备就绪再开启中断, 允许线程被调度
+  intr_enable();
 
   while (1) {
     console_put_str("Main ");
