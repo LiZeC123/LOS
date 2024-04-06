@@ -76,17 +76,20 @@ void test_strcmp() {
 
   const char *a = "Hello";
   const char *b = "Helee";
-  ASSERT(memcmp(a, b, 4) == 1);
+  ASSERT(strcmp(a, b) == 1);
 
   a = "Java";
   b = "Java";
-  ASSERT(memcmp(a, b, 4) == 0);
+  ASSERT(strcmp(a, b) == 0);
 
   a = "Raiden charm";
   b = "Raiden xharm";
-  ASSERT(memcmp(a, b, 13) == -1);
+  ASSERT(strcmp(a, b) == -1);
 
-  // TODO: 不等长字符串比较
+  a = "short";
+  b = "shorts";
+  ASSERT(strcmp(a, b) == -1);
+  ASSERT(strcmp(b, a) == 1);
 }
 
 // // 查找ch第一次出现在str的位置, 不存在则返回NULL
