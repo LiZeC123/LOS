@@ -93,7 +93,7 @@ static void make_main_thread() {
 TaskStruct *running_thread() {
   uint32_t esp;
   __asm__ __volatile__("mov %%esp, %0" : "=g"(esp));
-  // 由于每个PCB都是在整数位置开始, 因此直接对地址取整数即可
+  // 由于每个PCB都是当前内存页的起始位置, 因此直接对地址取整数即可
   return (TaskStruct *)(esp & 0xfffff000);
 }
 

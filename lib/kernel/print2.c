@@ -13,6 +13,7 @@ void print_number(uint64_t num) {
 
   char buf[19];
 
+  // 从后向前逐一计算每一位的16进制表示
   int idx = 17;
   while (idx >= 0) {
     int v = num % 16;
@@ -27,11 +28,16 @@ void print_number(uint64_t num) {
     num /= 16;
   }
 
+  // 从头部开始, 找到不为0的项目
   idx = 2;
   while (buf[idx++] == '0');
+  
+  // 在头部写入0x前缀
   idx -= 3;
   buf[idx+0] = '0';
   buf[idx+1] = 'x';
+  
+  // 字符串结束
   buf[18] = '\0';
 
   put_str(&buf[idx]);

@@ -10,7 +10,7 @@ void list_init(List *list) {
 }
 
 void list_insert_before(ListElem *before, ListElem *elem) {
-  IntrStatus old = intr_disable();
+  IntrStatus old = intr_disable(); // 变更链表结构操作不可被打断, 因此需要先关中断
 
   before->prev->next = elem;
 

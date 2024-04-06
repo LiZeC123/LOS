@@ -18,7 +18,7 @@ intr%1entry:
     push es
     push fs
     push gs
-    pushad
+    pushad          ; 依次入栈 eax, ecx, edx, ebx, esp, ebp, esi, edi
 
     mov al, 0x20    ; 向主片和从片发送EOI, 表示中断处理结束
     out 0xa0, al
