@@ -61,7 +61,7 @@ static void general_intr_handler(uint8_t vec_nr) {
 
   if (vec_nr == 14) {
     int page_fault_vaddr = 0;
-    __asm__("movl %%cr2, %0" : "=r"(page_fault_vaddr));
+    __asm__ __volatile__ ("movl %%cr2, %0" : "=r"(page_fault_vaddr));
     PRINTLINE("Page Fault Addr is ", page_fault_vaddr);
   }
 
@@ -71,8 +71,7 @@ static void general_intr_handler(uint8_t vec_nr) {
 }
 
 static void exception_init(void) {
-  int i;
-  for (i = 0; i < IDT_DESC_CNT; i++) {
+  for (int i = 0; i < IDT_DESC_CNT; i++) {
     // 先将所有的中断统一处理
     idt_table[i] = general_intr_handler;
     intr_name[i] = "unknown";
@@ -87,7 +86,7 @@ static void exception_init(void) {
   intr_name[5] = "#BR BOUND Range Exceeded Exception";
   intr_name[6] = "#UD Invalid Opcode Exception";
   intr_name[7] = "#NM Device Not Available Exception";
-  intr_name[8] = "JIDF Double Fault Exception";
+  intr_name[8] = "#DF Double Fault Exception";
   intr_name[9] = "Coprocessor Segment Overrun";
   intr_name[10] = "#TS Invalid TSS Exception";
   intr_name[11] = "#NP Segment Not Present";
