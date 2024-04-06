@@ -28,8 +28,6 @@ int bitmap_scan(BitMap *m, uint32_t cnt) {
     idx++;
   }
 
-  // ASSERT(idx < m->btmp_bytes_len);
-
   if (idx == m->btmp_bytes_len) {
     return -1;
   }
@@ -41,9 +39,11 @@ int bitmap_scan(BitMap *m, uint32_t cnt) {
 
   int start = idx * 8 + bit_idx;
   if (cnt == 1) {
+    // 如果仅需要申请1页空间, 则可以直接返回
     return start;
   }
 
+  // 否则需要判断从start开始的位置是否具有cnt个空闲空间
   uint32_t bit_left = m->btmp_bytes_len * 8 - start;
   uint32_t next_bit = start + 1;
   uint32_t count = 1;

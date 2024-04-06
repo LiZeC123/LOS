@@ -6,6 +6,9 @@
 
 #define PG_SIZE 4096
 
+// 位图结构的起始位置
+// 从此处开始的4页内存均可使用
+// 0xC009_E000开始的1页为内核主线程的PCB块
 #define MEM_BITMAP_BASE 0xc009a000
 
 #define K_HEAP_START 0xc0100000
@@ -16,8 +19,8 @@ typedef struct {
   uint32_t size;
 } Pool;
 
-Pool kernel_pool, user_pool;
-VirtualAddr kernel_vaddr;
+Pool kernel_pool, user_pool;  // 定义两个内存池, 管理内核空间和用户空间的物理地址分配
+VirtualAddr kernel_vaddr;     // 管理内核虚拟地址分配
 
 
 #define PDE_IDX(addr) ((addr & 0xffc00000) >> 22)
@@ -35,8 +38,12 @@ static void print_pool(const Pool *pool, const char *name) {
 
 static void mem_pool_init(uint32_t all_mem) {
   put_str("  mem_pool_init start\n");
-  uint32_t page_table_size = PG_SIZE * 256;
 
+  // 计算当前页表已经使用的空间
+  // 1个页目录表(1页)+页目录第0项和第0x301项指向的页表(1页)+内核空间245项页目录项指向的页表(254页)
+  // 因此当前页表数据正好使用了256页, 即1M内存空间
+  uint32_t page_table_size = PG_SIZE * 256;
+  // 页表相关数据结构占据的空间 + 内核代码的 1M 空间 = 当前已经使用的内存空间
   uint32_t used_mem = page_table_size + 0x100000;
   uint32_t free_mem = all_mem - used_mem;
   uint16_t all_free_pages = free_mem / PG_SIZE;
@@ -47,7 +54,7 @@ static void mem_pool_init(uint32_t all_mem) {
   uint32_t kbm_length = kernel_free_pages / 8;
   uint32_t ubm_length = user_free_pages / 8;
 
-  uint32_t kp_start = used_mem; // 跳过低端1M+已经分配的页表占据的空间
+  uint32_t kp_start = used_mem; // 跳过低端已经分配的空间(内核代码+页表)
   uint32_t up_start = kp_start + kernel_free_pages * PG_SIZE;
 
   kernel_pool.phy_addr_start = kp_start;
@@ -99,17 +106,14 @@ static void *vaddr_get(PoolType t, uint32_t pages) {
 
 uint32_t *pte_ptr(uint32_t vaddr) {
   // 按照虚拟地址的规则得到对应的页表项的虚拟地址
-  // 1. 页目录表的最后一项指向自己, 因此虚拟地址高10bit全部为1,
-  // 将页目录表视为一个页表
-  // 2. vaddr的高10bit作为索引, 可以定位vaddr的页表在页目录中的位置
-  // 3. vaddr的中间10bit作为索引, 可以定位vaddr的页表项在页表中的位置
-  // 4. 由于第3步处理器不会自动转换为偏移地址, 因此手动乘以4
+  // 先将页目录项视为页表项进行转换, 使得虚拟地址对应的内存页正好是页表项所在的内存页
+  // 在根据页表项索引计算出页表项的偏移地址
   return (uint32_t *)(0xffc00000 + ((vaddr & 0xffc00000) >> 10) +
                       PTE_IDX(vaddr) * 4);
 }
 
 uint32_t *pde_ptr(uint32_t vaddr) {
-  // 把页目录视为页表这件事重复两次, 然后根据vaddr得到偏移地址
+  // 把页目录视为页表这件事重复两次, 从而使虚拟地址对应的内存页正好是页目录项所在的内存页
   return (uint32_t *)(0xfffff000 + PDE_IDX(vaddr) * 4);
 }
 
@@ -184,6 +188,9 @@ void *get_kernel_pages(uint32_t pages) {
 
 void mem_init() {
   put_str("mem_init start\n");
+  // 在loader.S中使用BIOS方法获取了可用内存大小, 并写入total_men_bytes位置
+  // 该位置为 LOADER_BASE_ADDR + 0x200 = 0x900 + 0x200 = 0xb00
+  // 直接读取该位置数据, 即可获得可用内存大小
   uint32_t mem_bytes_total = (*(uint32_t *)(0xb00));
   mem_pool_init(mem_bytes_total);
   put_str("mem_init done\n");
