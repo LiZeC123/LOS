@@ -1,12 +1,12 @@
 #include "console.h"
 #include "debug.h"
 #include "interrupt.h"
+#include "ioqueue.h"
+#include "keyboard.h"
 #include "memory.h"
 #include "print.h"
 #include "thread.h"
 #include "time.h"
-#include "keyboard.h"
-#include "ioqueue.h"
 
 void init_all() {
   put_str("init_all...\n");
@@ -21,7 +21,7 @@ void init_all() {
 void k_thread_a(void *arg) {
   while (1) {
     IntrStatus oldStatus = intr_disable();
-    if(!ioq_empty(&KeybdBuf)) {
+    if (!ioq_empty(&KeybdBuf)) {
       console_put_str(arg);
       char byte = ioq_getchar(&KeybdBuf);
       console_put_char(byte);
@@ -33,7 +33,7 @@ void k_thread_a(void *arg) {
 void k_thread_b(void *arg) {
   while (1) {
     IntrStatus oldStatus = intr_disable();
-    if(!ioq_empty(&KeybdBuf)) {
+    if (!ioq_empty(&KeybdBuf)) {
       console_put_str(arg);
       char byte = ioq_getchar(&KeybdBuf);
       console_put_char(byte);
@@ -55,9 +55,10 @@ int main() {
 
   // 准备就绪再开启中断, 允许线程被调度
   intr_enable();
-  
-  while (1);
-  
+
+  while (1)
+    ;
+
   // while (1) {
   //   console_put_str("Main ");
   // };

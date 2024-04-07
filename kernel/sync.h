@@ -1,8 +1,8 @@
 #pragma once
 
 #include "list.h"
-#include <stdint.h>
 #include "thread.h"
+#include <stdint.h>
 
 typedef struct {
   uint8_t value;
@@ -10,19 +10,16 @@ typedef struct {
 } Semaphore;
 
 typedef struct {
-    TaskStruct* holder;
-    Semaphore semaphore;
-    uint32_t holder_repeat_nr;  // 持有者重复申请的次数
+  TaskStruct *holder;
+  Semaphore semaphore;
+  uint32_t holder_repeat_nr; // 持有者重复申请的次数
 } Lock;
-
 
 void sema_init(Semaphore *sm, uint8_t value);
 
 void sema_down(Semaphore *sm);
 
 void sema_up(Semaphore *sm);
-
-
 
 void lock_init(Lock *lock);
 

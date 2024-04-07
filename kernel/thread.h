@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdint.h>
 #include "list.h"
+#include <stdint.h>
 
 typedef void thread_func(void *);
 
@@ -62,15 +62,14 @@ typedef struct {
   uint8_t ticks;
   uint32_t elapsed_ticks;
 
-  ListElem general_tag;   
+  ListElem general_tag;
   ListElem all_list_tag;
-  uint32_t* pgdir;    // 进程自己的页表的虚拟地址
+  uint32_t *pgdir; // 进程自己的页表的虚拟地址
 
   uint32_t stack_magic; // 记录PCB边界信息, 从而可检查是否被破坏
 } TaskStruct;
 
 #define STACK_MAGIC 0xcafebabe
-
 
 TaskStruct *thread_start(char *name, int prio, thread_func func, void *args);
 

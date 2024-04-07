@@ -19,9 +19,9 @@ typedef struct {
   uint32_t size;
 } Pool;
 
-Pool kernel_pool, user_pool;  // 定义两个内存池, 管理内核空间和用户空间的物理地址分配
-VirtualAddr kernel_vaddr;     // 管理内核虚拟地址分配
-
+Pool kernel_pool,
+    user_pool; // 定义两个内存池, 管理内核空间和用户空间的物理地址分配
+VirtualAddr kernel_vaddr; // 管理内核虚拟地址分配
 
 #define PDE_IDX(addr) ((addr & 0xffc00000) >> 22)
 #define PTE_IDX(addr) ((addr & 0x003ff000) >> 12)
@@ -106,14 +106,16 @@ static void *vaddr_get(PoolType t, uint32_t pages) {
 
 uint32_t *pte_ptr(uint32_t vaddr) {
   // 按照虚拟地址的规则得到对应的页表项的虚拟地址
-  // 先将页目录项视为页表项进行转换, 使得虚拟地址对应的内存页正好是页表项所在的内存页
+  // 先将页目录项视为页表项进行转换,
+  // 使得虚拟地址对应的内存页正好是页表项所在的内存页
   // 在根据页表项索引计算出页表项的偏移地址
   return (uint32_t *)(0xffc00000 + ((vaddr & 0xffc00000) >> 10) +
                       PTE_IDX(vaddr) * 4);
 }
 
 uint32_t *pde_ptr(uint32_t vaddr) {
-  // 把页目录视为页表这件事重复两次, 从而使虚拟地址对应的内存页正好是页目录项所在的内存页
+  // 把页目录视为页表这件事重复两次,
+  // 从而使虚拟地址对应的内存页正好是页目录项所在的内存页
   return (uint32_t *)(0xfffff000 + PDE_IDX(vaddr) * 4);
 }
 

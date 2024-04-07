@@ -61,7 +61,7 @@ static void general_intr_handler(uint8_t vec_nr) {
 
   if (vec_nr == 14) {
     int page_fault_vaddr = 0;
-    __asm__ __volatile__ ("movl %%cr2, %0" : "=r"(page_fault_vaddr));
+    __asm__ __volatile__("movl %%cr2, %0" : "=r"(page_fault_vaddr));
     PRINTLINE("Page Fault Addr is ", page_fault_vaddr);
   }
 

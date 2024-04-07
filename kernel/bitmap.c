@@ -80,7 +80,6 @@ void bitmap_set(BitMap *m, uint32_t idx, int8_t value) {
   }
 }
 
-
 #ifdef TEST
 #include <stdio.h>
 

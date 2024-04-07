@@ -4,8 +4,9 @@
 #include <stdint.h>
 
 typedef struct {
-  BitMap vaddr_map;       // 记录虚拟地址分配情况
-  uint32_t vaddr_start;   // 记录虚拟地址起始位置, 虚拟地址视为无限大, 分配时调整起始位置
+  BitMap vaddr_map; // 记录虚拟地址分配情况
+  uint32_t vaddr_start; // 记录虚拟地址起始位置, 虚拟地址视为无限大,
+                        // 分配时调整起始位置
 } VirtualAddr;
 
 typedef enum { PF_KERNEL = 1, PF_USER = 2 } PoolType;

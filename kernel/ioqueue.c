@@ -73,4 +73,4 @@ void ioq_putchar(IoQueue *ioq, char byte) {
   if (ioq->consumer != NULL) {
     wakeup(&ioq->consumer);
   }
-} 
+}
