@@ -23,6 +23,9 @@ LOS是一个操作系统, 用于学习操作系统的基本理论. 操作系统�
 
 ### 参考文章
 
+- [操作系统真象还原 | 我可是会飞的啊](https://www.kn0sky.com/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9C%9F%E8%B1%A1%E8%BF%98%E5%8E%9F)
+- [操作系统真象还原：从0开始自制操作系统 全过程记录 | Morris's Blog](https://zhuanlan.zhihu.com/p/674860781)
+
 ### ELF文件相关
 
 - [LSC ELF文件格式](https://github.com/LiZeC123/LSC/blob/master/docs/ch/ass/ELF.md)
