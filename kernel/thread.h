@@ -2,6 +2,7 @@
 
 #include "list.h"
 #include <stdint.h>
+#include "memory.h"
 
 typedef void thread_func(void *);
 
@@ -54,7 +55,7 @@ typedef struct {
 } ThreadStack;
 
 typedef struct {
-  uint32_t *self_kstack;
+  uint32_t *self_kstack;  // 线程的内核栈
   TaskStatus status;
   uint8_t priority;
   char name[16];
@@ -64,7 +65,9 @@ typedef struct {
 
   ListElem general_tag;
   ListElem all_list_tag;
-  uint32_t *pgdir; // 进程自己的页表的虚拟地址
+
+  uint32_t *pgdir;            // 进程自己的页表的虚拟地址
+  VirtualAddr userprog_vaddr; // 用户进程的虚拟地址
 
   uint32_t stack_magic; // 记录PCB边界信息, 从而可检查是否被破坏
 } TaskStruct;
@@ -82,3 +85,6 @@ void thread_init();
 void thread_block(TaskStatus stat);
 
 void thread_unblock(TaskStruct *pthread);
+
+void thread_create(TaskStruct *pthread, thread_func func, void *args);
+void init_thread(TaskStruct *pthread, char *name, int prio);

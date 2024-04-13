@@ -6,7 +6,7 @@
 typedef struct {
   BitMap vaddr_map; // 记录虚拟地址分配情况
   uint32_t vaddr_start; // 记录虚拟地址起始位置, 虚拟地址视为无限大,
-                        // 分配时调整起始位置
+                        // 分配时根据起始位置与idx值计算实际的地址
 } VirtualAddr;
 
 typedef enum { PF_KERNEL = 1, PF_USER = 2 } PoolType;
@@ -20,3 +20,5 @@ typedef enum { PF_KERNEL = 1, PF_USER = 2 } PoolType;
 
 void mem_init();
 void *get_kernel_pages(uint32_t pages);
+void *get_a_page(PoolType type, uint32_t vaddr);
+uint32_t addr_v2p(uint32_t vaddr);

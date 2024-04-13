@@ -3,7 +3,7 @@
 #include "print.h"
 #include "stdint.h"
 #include "string.h"
-#include "thread.h"
+
 
 // 任务状态段 tss 结构
 struct tss {
@@ -46,7 +46,7 @@ void update_tss_esp(TaskStruct *pthread) {
 
 // 创建 gdt 描述符
 static GdtDesc make_gdt_desc(uint32_t *desc_addr, uint32_t limit,
-                                     uint8_t attr_low, uint8_t attr_high) {
+                             uint8_t attr_low, uint8_t attr_high) {
   uint32_t desc_base = (uint32_t)desc_addr;
   GdtDesc desc;
   desc.limit_low_word = limit & 0x0000ffff;
@@ -69,8 +69,8 @@ void tss_init() {
 
   // gdt 段基址为 0x900, 把 tss 放到第 4 个位置, 也就是 0x900+0x20 的位置
   // 在 gdt 中添加 dpl 为 0 的 TSS 描述符
-  *((GdtDesc *)0xc0000920) = make_gdt_desc(
-      (uint32_t *)&tss, tss_size - 1, TSS_ATTR_LOW, TSS_ATTR_HIGH);
+  *((GdtDesc *)0xc0000920) = make_gdt_desc((uint32_t *)&tss, tss_size - 1,
+                                           TSS_ATTR_LOW, TSS_ATTR_HIGH);
   // 在 gdt 中添加 dpl 为 3 的数据段和代码段描述符
   *((GdtDesc *)0xc0000928) = make_gdt_desc(
       (uint32_t *)0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
