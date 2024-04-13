@@ -3,8 +3,9 @@
 #include "interrupt.h"
 #include "memory.h"
 #include "print.h"
-#include "string.h"
 #include "process.h"
+#include "string.h"
+#include "sync.h"
 
 #define PG_SIZE 4096
 
@@ -36,9 +37,20 @@ void thread_create(TaskStruct *pthread, thread_func func, void *args) {
   ts->ebp = ts->ebx = ts->esi = ts->edi = 0;
 }
 
+// 分配 pid
+Lock pid_lock;
+static pid_t allocate_pid(void) {
+  static pid_t next_pid = 0;
+  lock_acquire(&pid_lock);
+  next_pid++;
+  lock_release(&pid_lock);
+  return next_pid;
+}
+
 void init_thread(TaskStruct *pthread, char *name, int prio) {
   memset(pthread, 0, sizeof(*pthread));
   strcpy(pthread->name, name);
+  pthread->pid = allocate_pid();
 
   if (pthread == main_thread) {
     pthread->status = TASK_RUNNING;
@@ -116,7 +128,7 @@ void thread_init() {
   put_str("thread_init start\n");
   list_init(&thread_all_list);
   list_init(&thread_ready_list);
-
+  lock_init(&pid_lock);
   make_main_thread();
   put_str("thread_init done\n");
 }

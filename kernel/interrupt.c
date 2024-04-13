@@ -3,7 +3,7 @@
 #include "io.h"
 #include "print.h"
 
-#define IDT_DESC_CNT 0x30
+#define IDT_DESC_CNT 0x81
 
 #define PIC_M_CTRL 0x20
 #define PIC_M_DATA 0x21
@@ -41,11 +41,18 @@ static void make_idt_desc(GateDesc *p_gdesc, uint8_t attr,
   p_gdesc->func_offset_high_word = ((uint32_t)function & 0xffff0000) >> 16;
 }
 
+
+extern uint32_t syscall_handler(void);
+
 // 初始化中断向量表
 static void idt_desc_init() {
   for (int i = 0; i < IDT_DESC_CNT; i++) {
     make_idt_desc(&idt[i], IDT_DESC_ATTR_DPL0, intr_entry_table[i]);
   }
+
+  // 单独注册 系统调用的中断
+  make_idt_desc(&idt[0x80], IDT_DESC_ATTR_DPL3, syscall_handler);
+
   put_str("  idt_desc_init done\n");
 }
 
