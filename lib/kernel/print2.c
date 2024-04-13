@@ -9,6 +9,7 @@ void next_line() { put_char('\n'); }
 void print_number(uint64_t num) {
   if(num == 0) {
     put_str("0x0");
+    return;
   }
 
   char buf[19];
