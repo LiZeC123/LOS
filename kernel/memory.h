@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bitmap.h"
+#include "list.h"
 #include <stdint.h>
 
 typedef struct {
@@ -22,3 +23,23 @@ void mem_init();
 void *get_kernel_pages(uint32_t pages);
 void *get_a_page(PoolType type, uint32_t vaddr);
 uint32_t addr_v2p(uint32_t vaddr);
+
+// 内存块
+typedef struct mem_block {
+    ListElem free_elem;
+} MemBlock;
+
+// 内存块描述符
+typedef struct mem_block_desc {
+    uint32_t block_size; // 内存块大小
+    uint32_t blocks_per_arena; // 本 arena 中可容纳此 mem_block 的数量
+    List free_list; // 目前可用的 mem_block 链表
+} MemBlockDesc;
+
+#define DESC_CNT 7 // 内存块描述符个数
+
+// 初始化内存块描述符
+void block_desc_init(MemBlockDesc *desc_array);
+
+// 内存分配的系统调用实现
+void *sys_malloc(uint32_t size);

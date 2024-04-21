@@ -71,6 +71,7 @@ typedef struct {
 
   uint32_t *pgdir;            // 进程自己的页表的虚拟地址
   VirtualAddr userprog_vaddr; // 用户进程的虚拟地址
+  MemBlockDesc u_block_desc[DESC_CNT];
 
   uint32_t stack_magic; // 记录PCB边界信息, 从而可检查是否被破坏
 } TaskStruct;
