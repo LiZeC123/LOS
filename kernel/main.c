@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "print.h"
 #include "process.h"
+#include "stdio.h"
 #include "syscall-init.h"
 #include "syscall.h"
 #include "thread.h"
@@ -26,26 +27,18 @@ void init_all() {
   syscall_init();
 }
 
+#define UNUSED(x) ((void)(x))
+
 void k_thread_a(void *arg) {
-  char *para = arg;
-  console_put_str("  thread_a_pid:");
-  console_put_int(sys_getpid());
-  console_put_str("\n");
-  console_put_str("  prog_a_pid:");
-  console_put_int(prog_a_pid);
-  console_put_str("\n");
+  UNUSED(arg);
+  printf("  thread_a_pid: %d prog_a_pid: %d\n", sys_getpid(), prog_a_pid);
   while (1)
     ;
 }
 
 void k_thread_b(void *arg) {
-  char *para = arg;
-  console_put_str("  thread_b_pid:");
-  console_put_int(sys_getpid());
-  console_put_str("\n");
-  console_put_str("  prog_b_pid:");
-  console_put_int(prog_b_pid);
-  console_put_str("\n");
+  UNUSED(arg);
+  printf("  thread_b_pid: %d prog_b_pid: %d\n", sys_getpid(), prog_b_pid);
   while (1)
     ;
 }
