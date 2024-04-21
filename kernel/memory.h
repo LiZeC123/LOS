@@ -43,3 +43,4 @@ void block_desc_init(MemBlockDesc *desc_array);
 
 // 内存分配的系统调用实现
 void *sys_malloc(uint32_t size);
+void sys_free(void *ptr);
