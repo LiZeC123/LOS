@@ -3,7 +3,8 @@ WARNFLG = -Wall -Wextra
 # 使用 -D NODEBUG 可以关闭ASSERT
 DEBUG = -g
 STD = -std=c11
-CFLAGS += $(DEBUG) $(WARNFLG) $(STD) -m32 -fno-stack-protector -fno-builtin
+LIB = -I lib/ -I lib/kernel/ -I lib/user/ -I kernel/ -I device/ -I thread/ -I userprog/ -I fs/ -I shell/
+CFLAGS += $(DEBUG) $(WARNFLG) $(LIB) $(STD) -m32 -fno-stack-protector -fno-builtin
 CC = gcc
 DDFLAGS = of=hd60M.img bs=512 conv=notrunc
 
@@ -28,29 +29,26 @@ kernel.bin: main.o kernel.o stdio.o console.o sync.o keyboard.o interrupt.o tss.
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 
-bitmap.o: kernel/bitmap.c	
+console.o: device/console.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-console.o: kernel/console.c	
+ide.o: device/ide.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-debug.o: kernel/debug.c	
+ioqueue.o: device/ioqueue.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+keyboard.o: device/keyboard.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+time.o: device/time.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 interrupt.o: kernel/interrupt.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-ioqueue.o: kernel/ioqueue.c
-	$(CC) $(CFLAGS) -c -o $@ $^
-
 kernel.o: kernel/kernel.S
 	nasm -f elf -I boot/ -o $@ $^
-
-keyboard.o: kernel/keyboard.c
-	$(CC) $(CFLAGS) -c -o $@ $^
-
-list.o: kernel/list.c
-	$(CC) $(CFLAGS) -c -o $@ $^
 
 main.o: kernel/main.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
@@ -58,40 +56,46 @@ main.o: kernel/main.c
 memory.o: kernel/memory.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-process.o: kernel/process.c	
-	$(CC) $(CFLAGS) -c -o $@ $^
-
-stdio.o: kernel/stdio.c
-	$(CC) $(CFLAGS) -c -o $@ $^
-
-string.o: kernel/string.c	
-	$(CC) $(CFLAGS) -c -o $@ $^
-
-sync.o: kernel/sync.c	
-	$(CC) $(CFLAGS) -c -o $@ $^
-
 syscall-init.o: kernel/syscall-init.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-syscall.o: kernel/syscall.c	
+bitmap.o: lib/kernel/bitmap.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-thread.o: kernel/thread.c	
-	$(CC) $(CFLAGS) -c -o $@ $^
-
-switch.o : kernel/switch.S
-	nasm -f elf -o $@ $^
-
-time.o: kernel/time.c	
-	$(CC) $(CFLAGS) -c -o $@ $^
-
-tss.o: kernel/tss.c	
+list.o: lib/kernel/list.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 print.o: lib/kernel/print.S
 	nasm -f elf -I boot/ -o $@ $^
 
 print2.o: lib/kernel/print2.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+debug.o: lib/user/debug.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+syscall.o: lib/user/syscall.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+stdio.o: lib/stdio.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+string.o: lib/string.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+switch.o : thread/switch.S
+	nasm -f elf -o $@ $^
+
+sync.o: thread/sync.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+thread.o: thread/thread.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+process.o: userprog/process.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+tss.o: userprog/tss.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 
