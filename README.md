@@ -6,20 +6,22 @@ LOS操作系统
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/LiZeC123/LOS)
 ![GitHub last commit](https://img.shields.io/github/last-commit/LiZeC123/LOS)
 
-LOS是一个操作系统, 用于学习操作系统的基本理论. 操作系统同时具有两个身份: 一方面, 操作系统作为硬件的抽象, 为上层的应用程序提供更容易使用的接口(例如直接操作磁盘和使用文件这种抽象概念), 另一方面, 操作系统作为资源管理者, 管理底层的硬件, 并为上层的多个用户/程序提供资源.
+LOS是一个操作系统, 用于学习操作系统的基本理论. LOS可在Linux环境下编译, 并在Bochs中运行. 系统提供基本的Shell指令并支持运行ELF格式的可执行文件.
+
+> 特别地, 本系统支持运行[LSC编译组件](https://github.com/LiZeC123/LSC)编译的可执行程序
 
 
 开发环境配置指南
 -------------------
 
-- [开发环境配置](doc/0x00开发环境配置.md)
+可参考[开发环境配置](doc/0x00开发环境配置.md)进行配置, 更多与本项目相关的内容可阅读本项目的[文档](/doc/README.md)
 
 
 参考资料
 --------------
 ### 参考书籍
 
-- 操作系统真象还原
+- [操作系统真象还原](https://book.douban.com/subject/26745156/)
 
 ### 参考文章
 
