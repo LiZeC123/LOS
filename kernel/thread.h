@@ -90,5 +90,7 @@ void thread_block(TaskStatus stat);
 
 void thread_unblock(TaskStruct *pthread);
 
+void thread_yield();
+
 void thread_create(TaskStruct *pthread, thread_func func, void *args);
 void init_thread(TaskStruct *pthread, char *name, int prio);

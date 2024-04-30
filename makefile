@@ -11,7 +11,7 @@ DDFLAGS = of=hd60M.img bs=512 conv=notrunc
 start: all
 	bochs -f bochsrc.disk -q  
 
-all: hd60M.img mbr.bin loader.bin kernel.bin
+all: hd60M.img hd80M.img mbr.bin loader.bin kernel.bin
 
 # 创建MBR引导文件
 mbr.bin:  boot/mbr.S boot/boot.inc
@@ -24,7 +24,7 @@ loader.bin: boot/loader.S boot/boot.inc
 	dd $(DDFLAGS)  if=$@ count=4 seek=2
 
 # 创建内核
-kernel.bin: main.o kernel.o console.o sync.o keyboard.o interrupt.o tss.o process.o stdio.o syscall-init.o syscall.o thread.o process.o time.o switch.o list.o memory.o bitmap.o ioqueue.o string.o debug.o print2.o print.o 
+kernel.bin: main.o kernel.o stdio.o console.o sync.o keyboard.o interrupt.o tss.o process.o stdio.o syscall-init.o syscall.o thread.o process.o time.o switch.o list.o memory.o bitmap.o ioqueue.o string.o debug.o print2.o print.o 
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 
@@ -99,6 +99,8 @@ print2.o: lib/kernel/print2.c
 hd60M.img:
 	bximage -q -func="create" -hd=60 -imgmode="flat" -sectsize=512 hd60M.img 
 
+hd80M.img:
+	bximage -q -func="create" -hd=80 -imgmode="flat" -sectsize=512 hd80M.img 
 
 clear:
 	rm -f *.bin

@@ -9,7 +9,7 @@
 
 #define PG_SIZE 4096
 
-TaskStruct *main_thread;
+TaskStruct *main_thread, *idle_thread;
 List thread_ready_list;
 List thread_all_list;
 
@@ -113,7 +113,10 @@ void schedule() {
     // 否则其他情况, 该线程无法就绪, 留在all队列即可
   }
 
-  ASSERT(!list_empty(&thread_ready_list));
+  if (list_empty(&thread_ready_list)) {
+    // 如果就绪队列中没有可运行的任务, 就唤醒 idle
+    thread_unblock(idle_thread);
+  }
 
   // 从就绪队列中调度下一个线程
   thread_tag = list_pop(&thread_ready_list);
@@ -122,15 +125,6 @@ void schedule() {
 
   process_active(next); // 激活下一个任务的页表
   switch_to(cur, next);
-}
-
-void thread_init() {
-  put_str("thread_init start\n");
-  list_init(&thread_all_list);
-  list_init(&thread_ready_list);
-  lock_init(&pid_lock);
-  make_main_thread();
-  put_str("thread_init done\n");
 }
 
 void thread_block(TaskStatus stat) {
@@ -159,4 +153,35 @@ void thread_unblock(TaskStruct *pthread) {
   }
 
   intr_set_status(old_status);
+}
+
+void thread_yield() {
+  TaskStruct *cur = running_thread();
+  IntrStatus oldStatus = intr_disable();
+  ASSERT(!list_find(&thread_ready_list, &cur->general_tag));
+  list_append(&thread_ready_list, &cur->general_tag);
+  cur->status = TASK_READY;
+  schedule();
+  intr_set_status(oldStatus);
+}
+
+#define UNUSED(x) ((void)(x))
+
+static void idle(void *arg) {
+  UNUSED(arg);
+  while (1) {
+    thread_block(TASK_BLOCKED);
+    // 执行 hlt 时必须要保证目前处在开中断的情况下
+    __asm__ __volatile__("sti; hlt" : : : "memory");
+  }
+}
+
+void thread_init() {
+  put_str("thread_init start\n");
+  list_init(&thread_all_list);
+  list_init(&thread_ready_list);
+  lock_init(&pid_lock);
+  make_main_thread();
+  idle_thread = thread_start("idle", 10, idle, NULL);
+  put_str("thread_init done\n");
 }

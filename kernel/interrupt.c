@@ -41,7 +41,6 @@ static void make_idt_desc(GateDesc *p_gdesc, uint8_t attr,
   p_gdesc->func_offset_high_word = ((uint32_t)function & 0xffff0000) >> 16;
 }
 
-
 extern uint32_t syscall_handler(void);
 
 // 初始化中断向量表
@@ -123,8 +122,8 @@ static void pic_init() {
   outb(PIC_S_DATA, 0x02);
   outb(PIC_S_DATA, 0x01);
 
-  outb(PIC_M_DATA, 0xfc);
-  outb(PIC_S_DATA, 0xff);
+  outb(PIC_M_DATA, 0xf8);
+  outb(PIC_S_DATA, 0xbf);
 
   // // 打开键盘中断
   // outb(PIC_M_DATA, 0xfd);
