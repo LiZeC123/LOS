@@ -25,7 +25,7 @@ loader.bin: boot/loader.S boot/boot.inc
 	dd $(DDFLAGS)  if=$@ count=4 seek=2
 
 # 创建内核
-kernel.bin: main.o kernel.o stdio.o console.o sync.o keyboard.o interrupt.o tss.o process.o stdio.o syscall-init.o syscall.o thread.o process.o time.o switch.o list.o memory.o bitmap.o ioqueue.o string.o debug.o print2.o print.o 
+kernel.bin: main.o kernel.o stdio.o ide.o console.o sync.o keyboard.o interrupt.o tss.o process.o stdio.o syscall-init.o syscall.o thread.o process.o time.o switch.o list.o memory.o bitmap.o ioqueue.o string.o debug.o print2.o print.o 
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 

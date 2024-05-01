@@ -1,4 +1,5 @@
 #include "keyboard.h"
+#include "func.h"
 #include "global.h"
 #include "interrupt.h"
 #include "io.h"
@@ -107,8 +108,6 @@ static char keymap[][2] = {
     /* 0x3A */ {caps_lock_char, caps_lock_char}
     /*其它按键暂不处理*/
 };
-
-#define UNUSED(x) ((void)(x))
 
 // 键盘中断处理程序
 static void intr_keyboard_handler(void) {

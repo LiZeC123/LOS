@@ -4,6 +4,7 @@
 #include "io.h"
 #include "print.h"
 #include "thread.h"
+#include "func.h"
 
 #define IRQ0_FREQUENCY 100
 #define INPUT_FREQUENCY 1193180
@@ -52,7 +53,6 @@ static void ticks_to_sleep(uint32_t sleep_ticks) {
 }
 
 
-#define DIV_ROUND_UP(X, STEP) ((X + STEP - 1) / (STEP))
 
 // 以毫秒为单位的 sleep
 void mtime_sleep(uint32_t m_seconds) {

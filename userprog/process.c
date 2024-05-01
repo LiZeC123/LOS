@@ -1,10 +1,11 @@
 #include "process.h"
 #include "console.h"
 #include "debug.h"
+#include "func.h"
 #include "global.h"
 #include "interrupt.h"
 #include "list.h"
-#include "memory.h"
+#include "../kernel/memory.h"  // make vscode language checker happy
 #include "string.h"
 #include "tss.h"
 

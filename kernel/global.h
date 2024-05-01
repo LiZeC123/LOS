@@ -83,4 +83,3 @@ typedef struct gdt_desc {
 
 #define EFLAG_IOPL_0 (0 << 12)
 
-#define DIV_ROUND_UP(X, STEP) ((X + STEP - 1) / (STEP))

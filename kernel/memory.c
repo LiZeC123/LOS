@@ -1,5 +1,6 @@
 #include "memory.h"
 #include "debug.h"
+#include "func.h"
 #include "global.h"
 #include "interrupt.h"
 #include "list.h"
@@ -331,7 +332,7 @@ void *get_a_page(PoolType type, uint32_t vaddr) {
     bitmap_set(&kernel_vaddr.vaddr_map, bit_idx, 1);
   } else {
     // 不允许交叉申请内存, 例如用户申请内核内存或内核申请用户内存
-    PAINC("get_a_page: not allow kernel alloc usersapce or user alloc "
+    PANIC("get_a_page: not allow kernel alloc usersapce or user alloc "
           "kernelspace.");
   }
 

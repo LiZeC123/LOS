@@ -1,5 +1,6 @@
 #include "thread.h"
 #include "debug.h"
+#include "func.h"
 #include "interrupt.h"
 #include "memory.h"
 #include "print.h"
@@ -164,8 +165,6 @@ void thread_yield() {
   schedule();
   intr_set_status(oldStatus);
 }
-
-#define UNUSED(x) ((void)(x))
 
 static void idle(void *arg) {
   UNUSED(arg);

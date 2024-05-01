@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define PAINC(...) assert(__FILE__, __LINE__, __func__, __VA_ARGS__)
+#define PANIC(...) assert(__FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define ASSERT(COND)                                                           \
   if (COND) {                                                                  \
   } else {                                                                     \
-    PAINC(#COND);                                                              \
+    PANIC(#COND);                                                              \
   }
 
 void assert(const char *filename, int line, const char *func,

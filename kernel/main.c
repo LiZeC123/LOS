@@ -1,5 +1,7 @@
 #include "console.h"
 #include "debug.h"
+#include "func.h"
+#include "ide.h"
 #include "interrupt.h"
 #include "ioqueue.h"
 #include "keyboard.h"
@@ -25,10 +27,12 @@ void init_all() {
   keyboard_init();
   tss_init();
   syscall_init();
+  ide_init();
 }
 
 /* 在线程中运行的函数 */
 void k_thread_a(void *arg) {
+  UNUSED(arg);
   void *addr1 = sys_malloc(256);
   void *addr2 = sys_malloc(255);
   void *addr3 = sys_malloc(254);
@@ -52,6 +56,7 @@ void k_thread_a(void *arg) {
 
 /* 在线程中运行的函数 */
 void k_thread_b(void *arg) {
+  UNUSED(arg);
   void *addr1 = sys_malloc(256);
   void *addr2 = sys_malloc(255);
   void *addr3 = sys_malloc(254);
