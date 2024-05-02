@@ -33,3 +33,4 @@ typedef struct path_search_record {
 
 void filesys_init();
 int32_t sys_open(const char *pathname, uint8_t flags);
+int32_t sys_close(int32_t fd);
