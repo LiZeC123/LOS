@@ -40,3 +40,6 @@ typedef struct ide_channel {
 } IdeChannel;
 
 void ide_init();
+void ide_read(Disk *hd, uint32_t lba, void *buf, uint32_t sec_cnt);
+void ide_write(Disk *hd, uint32_t lba, void *buf, uint32_t sec_cnt);
+

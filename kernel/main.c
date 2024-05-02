@@ -14,6 +14,7 @@
 #include "thread.h"
 #include "time.h"
 #include "tss.h"
+#include "fs.h"
 
 int prog_a_pid = 0, prog_b_pid = 0;
 
@@ -28,6 +29,7 @@ void init_all() {
   tss_init();
   syscall_init();
   ide_init();
+  filesys_init();
 }
 
 /* 在线程中运行的函数 */

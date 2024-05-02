@@ -9,10 +9,12 @@ CC = gcc
 DDFLAGS = of=hd60M.img bs=512 conv=notrunc
 
 # 启动系统
-start: all
+run: all
 	bochs -f bochsrc.disk -q  
 
 all: hd60M.img hd80M.img mbr.bin loader.bin kernel.bin
+
+rebuild: clear all
 
 # 创建MBR引导文件
 mbr.bin:  boot/mbr.S boot/boot.inc
@@ -25,7 +27,7 @@ loader.bin: boot/loader.S boot/boot.inc
 	dd $(DDFLAGS)  if=$@ count=4 seek=2
 
 # 创建内核
-kernel.bin: main.o kernel.o stdio.o ide.o console.o sync.o keyboard.o interrupt.o tss.o process.o stdio.o syscall-init.o syscall.o thread.o process.o time.o switch.o list.o memory.o bitmap.o ioqueue.o string.o debug.o print2.o print.o 
+kernel.bin: main.o dir.o inode.o fs.o superblock.o kernel.o stdio.o ide.o console.o sync.o keyboard.o interrupt.o tss.o process.o stdio.o syscall-init.o syscall.o thread.o process.o time.o switch.o list.o memory.o bitmap.o ioqueue.o string.o debug.o print2.o print.o 
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 
@@ -42,6 +44,18 @@ keyboard.o: device/keyboard.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 time.o: device/time.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+dir.o: fs/dir.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+fs.o: fs/fs.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+inode.o: fs/inode.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+superblock.o: fs/superblock.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 interrupt.o: kernel/interrupt.c
