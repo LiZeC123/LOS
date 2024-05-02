@@ -20,11 +20,19 @@ enum SYSCALL_NR { // 用来存放子功能号
   SYS_MOUNT,
   SYS_UMOUNT,
   SYS_MALLOC,
-  SYS_FREE
+  SYS_FREE,
+  SYS_PUTCHAR,
+  SYS_CLEAR,
 };
 
 pid_t fork();
-uint32_t getpid(void);
+int32_t read(int32_t fd, void *buf, uint32_t count);
 uint32_t write(int32_t fd, const void *buf, uint32_t count);
+
+uint32_t getpid(void);
+
 void *malloc(uint32_t size);
 void free(void *ptr);
+
+void putchar(char char_ascii);
+void clear();

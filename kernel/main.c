@@ -11,6 +11,7 @@
 #include "losmemory.h"
 #include "print.h"
 #include "process.h"
+#include "shell.h"
 #include "stdio.h"
 #include "string.h"
 #include "syscall-init.h"
@@ -38,18 +39,12 @@ void init_all() {
 void init() {
   uint32_t ret_pid = fork();
   if (ret_pid) {
-    printf("i am father, my pid is %d child pid is %d\n", getpid(), ret_pid);
-    // int status;
-    // int child_pid;
-    // while (1) {
-    //   child_pid = wait(&status);
-    //   printf("I am init, I recieve a child pid is %d status is %d\n",
-    //   child_pid,
-    //          status);
-    // }
+    while (1) {
+    }
+
   } else {
-    printf("I am child, my pid is %d, ret pid is %d", getpid(), ret_pid);
-    // my_shell();
+    // 子进程
+    my_shell();
   }
   while (1) {
   }
@@ -63,7 +58,8 @@ int main() {
   // 初始化所有的模块
   init_all();
 
-  put_str("Hello From Kernel.\n");
+  cls_screen();
+  console_put_str("lizec@LOS:/$");
 
   // 准备就绪再开启中断, 允许线程被调度
   intr_enable();
