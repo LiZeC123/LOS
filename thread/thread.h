@@ -78,6 +78,7 @@ typedef struct {
   MemBlockDesc u_block_desc[DESC_CNT];
 
   uint32_t cwd_inode_nr; // 进程所在工作目录的inode编号
+  int16_t parent_pid;    // 父进程 pid
   uint32_t stack_magic; // 记录PCB边界信息, 从而可检查是否被破坏
 } TaskStruct;
 
@@ -99,3 +100,5 @@ void thread_yield();
 
 void thread_create(TaskStruct *pthread, thread_func func, void *args);
 void init_thread(TaskStruct *pthread, char *name, int prio);
+
+pid_t fork_pid();

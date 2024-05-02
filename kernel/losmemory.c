@@ -538,6 +538,20 @@ void sys_free(void *ptr) {
   }
 }
 
+// 安装1页大小的vaddr,专门针对fork时虚拟地址位图无须操作的情况
+void *get_a_page_without_opvaddrbitmap(PoolType pf, uint32_t vaddr) {
+  Pool *mem_pool = pf & PF_KERNEL ? &kernel_pool : &user_pool;
+  lock_acquire(&mem_pool->lock);
+  void *page_phyaddr = palloc(mem_pool);
+  if (page_phyaddr == NULL) {
+    lock_release(&mem_pool->lock);
+    return NULL;
+  }
+  page_table_add((void *)vaddr, page_phyaddr);
+  lock_release(&mem_pool->lock);
+  return (void *)vaddr;
+}
+
 void mem_init() {
   put_str("mem_init start\n");
   // 在loader.S中使用BIOS方法获取了可用内存大小, 并写入total_men_bytes位置

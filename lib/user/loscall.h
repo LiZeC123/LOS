@@ -1,6 +1,8 @@
 #pragma once
 
 #include "stdint.h"
+#include "thread.h"
+
 enum SYSCALL_NR { // 用来存放子功能号
   SYS_RESTART,
   SYS_FORK,
@@ -20,7 +22,9 @@ enum SYSCALL_NR { // 用来存放子功能号
   SYS_MALLOC,
   SYS_FREE
 };
+
+pid_t fork();
 uint32_t getpid(void);
 uint32_t write(int32_t fd, const void *buf, uint32_t count);
-void* malloc(uint32_t size);
-void free(void* ptr);
+void *malloc(uint32_t size);
+void free(void *ptr);

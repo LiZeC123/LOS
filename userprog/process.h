@@ -14,3 +14,5 @@
 
 void process_execute(void *filename, char *name);
 void process_active(TaskStruct *p_thread);
+void page_dir_activate(TaskStruct *p_thread);
+uint32_t *create_page_dir();

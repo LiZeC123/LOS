@@ -54,3 +54,5 @@ void *malloc(uint32_t size) { return (void *)_syscall1(SYS_MALLOC, size); }
 
 // 释放 ptr 指向的内存
 void free(void *ptr) { _syscall1(SYS_FREE, ptr); }
+
+pid_t fork() { return _syscall0(SYS_FORK); }

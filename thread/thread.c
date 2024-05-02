@@ -39,12 +39,16 @@ void thread_create(TaskStruct *pthread, thread_func func, void *args) {
 
 // 分配 pid
 Lock pid_lock;
-static pid_t allocate_pid(void) {
+static pid_t allocate_pid() {
   static pid_t next_pid = 0;
   lock_acquire(&pid_lock);
   next_pid++;
   lock_release(&pid_lock);
   return next_pid;
+}
+
+pid_t fork_pid() {
+   return allocate_pid();
 }
 
 // 初始化线程指针（PCB），线程名称，线程优先级
@@ -77,6 +81,7 @@ void init_thread(TaskStruct *pthread, char *name, int prio) {
   }
 
   pthread->cwd_inode_nr = 0;
+  pthread->parent_pid = -1; // -1表示无父进程
   pthread->stack_magic = STACK_MAGIC;
 }
 
@@ -187,11 +192,16 @@ static void idle(void *arg) {
   }
 }
 
+// 声明init函数, 对应的实现在main文件
+void init();
+
+
 void thread_init() {
   put_str("thread_init start\n");
   list_init(&thread_all_list);
   list_init(&thread_ready_list);
   lock_init(&pid_lock);
+  process_execute(init, "init");
   make_main_thread();
   idle_thread = thread_start("idle", 10, idle, NULL);
   put_str("thread_init done\n");

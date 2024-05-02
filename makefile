@@ -34,7 +34,7 @@ kernel.bin: console.o ide.o ioqueue.o keyboard.o time.o \
 			debug.o loscall.o \
 			stdio.o string.o \
 			switch.o sync.o thread.o \
-			process.o  tss.o     
+			fork.o process.o  tss.o     
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 
@@ -114,6 +114,9 @@ sync.o: thread/sync.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 thread.o: thread/thread.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+fork.o: userprog/fork.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 process.o: userprog/process.c	

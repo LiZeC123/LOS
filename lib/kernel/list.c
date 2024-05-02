@@ -1,7 +1,6 @@
 #include "list.h"
 #include "interrupt.h"
 
-
 void list_init(List *list) {
   list->head.prev = NULL;
   list->head.next = &list->tail;
@@ -10,7 +9,8 @@ void list_init(List *list) {
 }
 
 void list_insert_before(ListElem *before, ListElem *elem) {
-  IntrStatus old = intr_disable(); // 变更链表结构操作不可被打断, 因此需要先关中断
+  IntrStatus old =
+      intr_disable(); // 变更链表结构操作不可被打断, 因此需要先关中断
 
   before->prev->next = elem;
 
@@ -45,6 +45,7 @@ ListElem *list_pop(List *plist) {
   return elem;
 }
 
+// 查找链表中的元素
 bool list_find(List *plist, ListElem *obj) {
   for (ListElem *elem = plist->head.next; elem != &plist->tail;
        elem = elem->next) {

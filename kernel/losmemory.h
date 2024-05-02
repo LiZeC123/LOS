@@ -26,14 +26,14 @@ uint32_t addr_v2p(uint32_t vaddr);
 
 // 内存块
 typedef struct mem_block {
-    ListElem free_elem;
+  ListElem free_elem;
 } MemBlock;
 
 // 内存块描述符
 typedef struct mem_block_desc {
-    uint32_t block_size; // 内存块大小
-    uint32_t blocks_per_arena; // 本 arena 中可容纳此 mem_block 的数量
-    List free_list; // 目前可用的 mem_block 链表
+  uint32_t block_size;       // 内存块大小
+  uint32_t blocks_per_arena; // 本 arena 中可容纳此 mem_block 的数量
+  List free_list;            // 目前可用的 mem_block 链表
 } MemBlockDesc;
 
 #define DESC_CNT 7 // 内存块描述符个数
@@ -44,3 +44,6 @@ void block_desc_init(MemBlockDesc *desc_array);
 // 内存分配的系统调用实现
 void *sys_malloc(uint32_t size);
 void sys_free(void *ptr);
+
+void mfree_page(PoolType pf, void *_vaddr, uint32_t pg_cnt);
+void *get_a_page_without_opvaddrbitmap(PoolType pf, uint32_t vaddr);
