@@ -5,7 +5,7 @@
 #include "global.h"
 #include "interrupt.h"
 #include "list.h"
-#include "../kernel/memory.h"  // make vscode language checker happy
+#include "losmemory.h"
 #include "string.h"
 #include "tss.h"
 

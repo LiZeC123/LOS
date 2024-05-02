@@ -1,7 +1,8 @@
 #include "inode.h"
-#include "ide.h"
+#include "debug.h"
 #include "interrupt.h"
 #include "list.h"
+#include "string.h"
 
 // 用来存储 inode 位置
 typedef struct inode_position {
@@ -74,87 +75,86 @@ void inode_sync(Partition *part, INode *inode, void *io_buf) {
   }
 }
 
-
 // 根据 i 结点号返回相应的 i 结点
-INode* inode_open(Partition* part, uint32_t inode_no) {
-    // 先在已打开的 inode 链表中找 inode, 此链表是为提速创建的缓冲区
-    ListElem* elem = part->open_inodes.head.next;
-    INode* inode_found;
-    while (elem != &part->open_inodes.tail) {
-        inode_found = elem2entry(INode, inode_tag, elem);
-        if (inode_found->i_no == inode_no) {
-            inode_found->i_open_cnts++;
-            return inode_found;
-        }
-        elem = elem->next;
+INode *inode_open(Partition *part, uint32_t inode_no) {
+  // 先在已打开的 inode 链表中找 inode, 此链表是为提速创建的缓冲区
+  ListElem *elem = part->open_inodes.head.next;
+  INode *inode_found;
+  while (elem != &part->open_inodes.tail) {
+    inode_found = elem2entry(INode, inode_tag, elem);
+    if (inode_found->i_no == inode_no) {
+      inode_found->i_open_cnts++;
+      return inode_found;
     }
+    elem = elem->next;
+  }
 
-    // 由于 open_inodes 链表中找不到, 从硬盘读入此 inode 并加入此链表
-    INodePosition inode_pos;
+  // 由于 open_inodes 链表中找不到, 从硬盘读入此 inode 并加入此链表
+  INodePosition inode_pos;
 
-    // inode 位置信息会存入 inode_pos
-    // 包括 inode 所在扇区地址和扇区内的字节偏移量
-    inode_locate(part, inode_no, &inode_pos);
+  // inode 位置信息会存入 inode_pos
+  // 包括 inode 所在扇区地址和扇区内的字节偏移量
+  inode_locate(part, inode_no, &inode_pos);
 
-    // 为使通过 sys_malloc 创建的新 inode 被所有任务共享
-    // 需要将 inode 置于内核空间, 故需要临时将 cur_pbc->pgdir 置为 NULL
-    TaskStruct* cur = running_thread();
-    uint32_t* cur_pagedir_bak = cur->pgdir;
-    cur->pgdir = NULL;
-    // 以上三行代码完成后下面分配的内存将位于内核区
-    inode_found = (INode*)sys_malloc(sizeof(INode));
-    // 恢复 pgdir
-    cur->pgdir = cur_pagedir_bak;
+  // 为使通过 sys_malloc 创建的新 inode 被所有任务共享
+  // 需要将 inode 置于内核空间, 故需要临时将 cur_pbc->pgdir 置为 NULL
+  TaskStruct *cur = running_thread();
+  uint32_t *cur_pagedir_bak = cur->pgdir;
+  cur->pgdir = NULL;
+  // 以上三行代码完成后下面分配的内存将位于内核区
+  inode_found = (INode *)sys_malloc(sizeof(INode));
+  // 恢复 pgdir
+  cur->pgdir = cur_pagedir_bak;
 
-    char* inode_buf;
-    if (inode_pos.two_sec) { // 跨扇区的情况
-        inode_buf = (char*)sys_malloc(1024);
+  char *inode_buf;
+  if (inode_pos.two_sec) { // 跨扇区的情况
+    inode_buf = (char *)sys_malloc(1024);
 
-        ide_read(part->my_disk, inode_pos.sec_lba, inode_buf, 2);
-    } else { // 未跨扇区
-        inode_buf = (char*)sys_malloc(512);
-        ide_read(part->my_disk, inode_pos.sec_lba, inode_buf, 1);
-    }
-    memcpy(inode_found, inode_buf+inode_pos.off_size, sizeof(INode));
-    
-    list_push(&part->open_inodes, &inode_found->inode_tag);
-    inode_found->i_open_cnts = 1;
+    ide_read(part->my_disk, inode_pos.sec_lba, inode_buf, 2);
+  } else { // 未跨扇区
+    inode_buf = (char *)sys_malloc(512);
+    ide_read(part->my_disk, inode_pos.sec_lba, inode_buf, 1);
+  }
+  memcpy(inode_found, inode_buf + inode_pos.off_size, sizeof(INode));
 
-    sys_free(inode_buf);
-    return inode_found;
+  list_push(&part->open_inodes, &inode_found->inode_tag);
+  inode_found->i_open_cnts = 1;
+
+  sys_free(inode_buf);
+  return inode_found;
 }
 
 // 关闭 inode 或减少 inode 的打开数
-void inode_close(INode* inode) {
-    // 若没有进程再打开此文件, 将此 inode 去掉并释放空间
-    IntrStatus old_status = intr_disable();
-    if (--inode->i_open_cnts == 0) { 
-        // 将 inode 结点从 part->open_inodes 中去掉
-        list_remove(&inode->inode_tag);
-        // inode_open 时为实现 inode 被所有进程共享
-        // 已经在 sys_malloc 为 inode 分配了内核空间
-        // 释放 inode 时也要确保释放的是内核内存池
-        TaskStruct* cur = running_thread();
-        uint32_t* cur_pagedir_bak = cur->pgdir;
-        cur->pgdir = NULL;
-        sys_free(inode);
-        cur->pgdir = cur_pagedir_bak;
-    }
-    intr_set_status(old_status);
+void inode_close(INode *inode) {
+  // 若没有进程再打开此文件, 将此 inode 去掉并释放空间
+  IntrStatus old_status = intr_disable();
+  if (--inode->i_open_cnts == 0) {
+    // 将 inode 结点从 part->open_inodes 中去掉
+    list_remove(&inode->inode_tag);
+    // inode_open 时为实现 inode 被所有进程共享
+    // 已经在 sys_malloc 为 inode 分配了内核空间
+    // 释放 inode 时也要确保释放的是内核内存池
+    TaskStruct *cur = running_thread();
+    uint32_t *cur_pagedir_bak = cur->pgdir;
+    cur->pgdir = NULL;
+    sys_free(inode);
+    cur->pgdir = cur_pagedir_bak;
+  }
+  intr_set_status(old_status);
 }
 
 // 初始化 new_inode
-void inode_init(uint32_t inode_no, INode* new_inode) {
-    new_inode->i_no = inode_no;
-    new_inode->i_size = 0;
-    new_inode->i_open_cnts = 0;
-    new_inode->write_deny = false;
+void inode_init(uint32_t inode_no, INode *new_inode) {
+  new_inode->i_no = inode_no;
+  new_inode->i_size = 0;
+  new_inode->i_open_cnts = 0;
+  new_inode->write_deny = false;
 
-    // 初始化块索引数组 i_sector
-    uint8_t sec_idx = 0;
-    while (sec_idx < 13) {
-        // i_sectors[12] 为一级间接块地址
-        new_inode->i_sectors[sec_idx] = 0;
-        sec_idx++;
-    }
+  // 初始化块索引数组 i_sector
+  uint8_t sec_idx = 0;
+  while (sec_idx < 13) {
+    // i_sectors[12] 为一级间接块地址
+    new_inode->i_sectors[sec_idx] = 0;
+    sec_idx++;
+  }
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #define MAX_FILES_PER_PART 4096 // 每个分区所支持最大创建的文件数
 #define BITS_PER_SECTOR 4096    // 每扇区的位数
 #define SECTOR_SIZE 512         // 扇区字节大小
@@ -23,4 +25,11 @@ typedef struct path_search_record {
   enum file_types file_type;        // 文件类型
 } PathSearchRecord;
 
+// 文件操作类型
+#define O_RDONLY 0
+#define O_WRONLY 1
+#define O_RDWR   3
+#define O_CREAT  4
+
 void filesys_init();
+int32_t sys_open(const char *pathname, uint8_t flags);

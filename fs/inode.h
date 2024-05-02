@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ide.h"
 #include "list.h"
 #include <stdint.h>
 
@@ -14,8 +15,7 @@ typedef struct inode {
   ListElem inode_tag; // 用于加入已打开的 inode 队列
 } INode;
 
-
-void inode_init(uint32_t inode_no, INode* new_inode);
+void inode_init(uint32_t inode_no, INode *new_inode);
 void inode_sync(Partition *part, INode *inode, void *io_buf);
-INode* inode_open(Partition* part, uint32_t inode_no);
-void inode_close(INode* inode);
+INode *inode_open(Partition *part, uint32_t inode_no);
+void inode_close(INode *inode);

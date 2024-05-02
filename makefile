@@ -28,8 +28,8 @@ loader.bin: boot/loader.S boot/boot.inc
 
 # 创建内核
 kernel.bin: console.o ide.o ioqueue.o keyboard.o time.o \
-			dir.o fs.o inode.o superblock.o	\
-			interrupt.o kernel.o  main.o memory.o syscall-init.o \
+			dir.o file.o fs.o inode.o superblock.o	\
+			interrupt.o kernel.o main.o losmemory.o syscall-init.o \
 			bitmap.o list.o print2.o print.o \
 			debug.o loscall.o \
 			stdio.o string.o \
@@ -56,6 +56,9 @@ time.o: device/time.c
 dir.o: fs/dir.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
+file.o: fs/file.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
 fs.o: fs/fs.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
@@ -74,7 +77,7 @@ kernel.o: kernel/kernel.S
 main.o: kernel/main.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-memory.o: kernel/memory.c	
+losmemory.o: kernel/losmemory.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 syscall-init.o: kernel/syscall-init.c	
