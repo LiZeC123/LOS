@@ -76,6 +76,7 @@ void init_thread(TaskStruct *pthread, char *name, int prio) {
     fd_idx++;
   }
 
+  pthread->cwd_inode_nr = 0;
   pthread->stack_magic = STACK_MAGIC;
 }
 

@@ -1,5 +1,6 @@
 #include "console.h"
 #include "debug.h"
+#include "dir.h"
 #include "fs.h"
 #include "func.h"
 #include "ide.h"
@@ -131,26 +132,13 @@ int main() {
   thread_start("k_thread_a", 31, k_thread_a, "I am thread_a");
   thread_start("k_thread_b", 31, k_thread_b, "I am thread_b");
 
-  uint32_t fd = sys_open("/file1", O_RDWR);
-  printf("open /file1 fd:%d\n", fd);
-
-  char buf[64] = {0};
-  int read_bytes = sys_read(fd, buf, 6);
-  printf("1_ read %d byte:\n%s\n", read_bytes, buf);
-  
-  sys_lseek(fd, 2, SEEK_SET);
-  memset(buf, 0, 64);
-  read_bytes = sys_read(fd, buf, 12);
-  printf("2_ read %d byte:\n%s\n", read_bytes, buf);
-
-  sys_close(fd);
-  printf("%d closed now and reopen \n", fd);
-
-  fd = sys_open("/file1", O_RDWR);
-  memset(buf, 0, 64);
-  read_bytes = sys_read(fd, buf, 10);
-  printf("3_ read %d byte:\n%s\n", read_bytes, buf);
-
+  char cwd_buf[32] = {0};
+  sys_getcwd(cwd_buf, 32);
+  printf("cwd:%s\n", cwd_buf);
+  sys_chdir("/dirl");
+  printf("change cwd now\n");
+  sys_getcwd(cwd_buf, 32);
+  printf("cwd:%s\n", cwd_buf);
   while (1)
     ;
 

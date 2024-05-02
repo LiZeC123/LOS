@@ -1,8 +1,8 @@
 #pragma once
 
 #include "list.h"
-#include <stdint.h>
 #include "losmemory.h"
+#include <stdint.h>
 
 typedef void thread_func(void *);
 
@@ -59,7 +59,7 @@ typedef int16_t pid_t;
 #define MAX_FILES_OPEN_PER_PROC 8
 
 typedef struct {
-  uint32_t *self_kstack;  // 线程的内核栈
+  uint32_t *self_kstack; // 线程的内核栈
   pid_t pid;
   TaskStatus status;
   uint8_t priority;
@@ -77,6 +77,7 @@ typedef struct {
   VirtualAddr userprog_vaddr; // 用户进程的虚拟地址
   MemBlockDesc u_block_desc[DESC_CNT];
 
+  uint32_t cwd_inode_nr; // 进程所在工作目录的inode编号
   uint32_t stack_magic; // 记录PCB边界信息, 从而可检查是否被破坏
 } TaskStruct;
 

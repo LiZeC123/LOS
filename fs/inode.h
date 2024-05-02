@@ -19,3 +19,4 @@ void inode_init(uint32_t inode_no, INode *new_inode);
 void inode_sync(Partition *part, INode *inode, void *io_buf);
 INode *inode_open(Partition *part, uint32_t inode_no);
 void inode_close(INode *inode);
+void inode_release(struct partition *part, uint32_t inode_no);
