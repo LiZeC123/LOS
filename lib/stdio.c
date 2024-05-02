@@ -1,7 +1,7 @@
 #include "stdio.h"
 #include "console.h"
-#include "string.h"
 #include "loscall.h"
+#include "string.h"
 
 #define va_list char *
 #define va_start(ap, v) ap = (va_list) & v // 把ap指向第一个固定参数v
@@ -84,7 +84,7 @@ uint32_t printf(const char *format, ...) {
   char buf[1024] = {0};   // 用于存储拼接后的字符串
   vsprintf(buf, format, args);
   va_end(args);
-  return write(buf);
+  return write(1, buf, strlen(buf));
 }
 
 // 供内核使用的格式化输出函数
