@@ -10,7 +10,7 @@
 #include "process.h"
 #include "stdio.h"
 #include "syscall-init.h"
-#include "syscall.h"
+#include "loscall.h"
 #include "thread.h"
 #include "time.h"
 #include "tss.h"

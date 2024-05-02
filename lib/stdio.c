@@ -1,7 +1,7 @@
 #include "stdio.h"
 #include "console.h"
 #include "string.h"
-#include "syscall.h"
+#include "loscall.h"
 
 #define va_list char *
 #define va_start(ap, v) ap = (va_list) & v // 把ap指向第一个固定参数v

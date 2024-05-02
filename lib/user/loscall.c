@@ -1,4 +1,4 @@
-#include "syscall.h"
+#include "loscall.h"
 
 /* 无参数的系统调用 */
 #define _syscall0(NUMBER)                                                      \

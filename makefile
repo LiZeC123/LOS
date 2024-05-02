@@ -31,7 +31,7 @@ kernel.bin: console.o ide.o ioqueue.o keyboard.o time.o \
 			dir.o fs.o inode.o superblock.o	\
 			interrupt.o kernel.o  main.o memory.o syscall-init.o \
 			bitmap.o list.o print2.o print.o \
-			debug.o syscall.o \
+			debug.o loscall.o \
 			stdio.o string.o \
 			switch.o sync.o thread.o \
 			process.o  tss.o     
@@ -95,7 +95,7 @@ print2.o: lib/kernel/print2.c
 debug.o: lib/user/debug.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-syscall.o: lib/user/syscall.c	
+loscall.o: lib/user/loscall.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 stdio.o: lib/stdio.c
