@@ -28,11 +28,19 @@ typedef struct path_search_record {
 // 文件操作类型
 #define O_RDONLY 0
 #define O_WRONLY 1
-#define O_RDWR   3
-#define O_CREAT  4
+#define O_RDWR 3
+#define O_CREAT 4
+
+// 文件属性结构体
+typedef struct stat {
+  uint32_t st_ino;             // inode 编号
+  uint32_t st_size;            // 尺寸
+  enum file_types st_filetype; // 文件类型
+} Stat;
 
 void filesys_init();
 int32_t sys_open(const char *pathname, uint8_t flags);
 int32_t sys_close(int32_t fd);
 int32_t sys_write(int32_t fd, const void *buf, uint32_t count);
-int32_t sys_read(int32_t fd, void* buf, uint32_t count);
+int32_t sys_read(int32_t fd, void *buf, uint32_t count);
+int32_t sys_lseek(int32_t fd, int32_t offset, uint8_t whence);

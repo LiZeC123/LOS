@@ -11,11 +11,11 @@
 #include "print.h"
 #include "process.h"
 #include "stdio.h"
+#include "string.h"
 #include "syscall-init.h"
 #include "thread.h"
 #include "time.h"
 #include "tss.h"
-#include "string.h"
 
 int prog_a_pid = 0, prog_b_pid = 0;
 
@@ -137,7 +137,8 @@ int main() {
   char buf[64] = {0};
   int read_bytes = sys_read(fd, buf, 6);
   printf("1_ read %d byte:\n%s\n", read_bytes, buf);
-
+  
+  sys_lseek(fd, 2, SEEK_SET);
   memset(buf, 0, 64);
   read_bytes = sys_read(fd, buf, 12);
   printf("2_ read %d byte:\n%s\n", read_bytes, buf);
