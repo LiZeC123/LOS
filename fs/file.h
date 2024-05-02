@@ -1,7 +1,7 @@
 #pragma once
 
-#include "inode.h"
 #include "dir.h"
+#include "inode.h"
 #include <stdint.h>
 
 // 文件结构
@@ -27,12 +27,11 @@ typedef enum bitmap_type {
 
 #define MAX_FILE_OPEN 32 // 系统可打开的最大文件数
 
-
 int32_t block_bitmap_alloc(Partition *part);
 int32_t inode_bitmap_alloc(Partition *part);
 void bitmap_sync(Partition *part, uint32_t bit_idx, uint8_t btmp);
-int32_t file_create(Dir* parent_dir, char* filename, uint8_t flag);
+int32_t file_create(Dir *parent_dir, char *filename, uint8_t flag);
 int32_t file_open(uint32_t inode_no, uint8_t flag);
-int32_t file_close(struct file* file);
+int32_t file_close(struct file *file);
 int32_t file_write(File *file, const void *buf, uint32_t count);
 int32_t file_read(struct file *file, void *buf, uint32_t count);
