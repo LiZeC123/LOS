@@ -2,7 +2,7 @@
 
 #include "list.h"
 #include <stdint.h>
-#include "memory.h"
+#include "losmemory.h"
 
 typedef void thread_func(void *);
 
@@ -56,6 +56,8 @@ typedef struct {
 
 typedef int16_t pid_t;
 
+#define MAX_FILES_OPEN_PER_PROC 8
+
 typedef struct {
   uint32_t *self_kstack;  // 线程的内核栈
   pid_t pid;
@@ -65,6 +67,8 @@ typedef struct {
 
   uint8_t ticks;
   uint32_t elapsed_ticks;
+
+  int32_t fd_table[MAX_FILES_OPEN_PER_PROC]; // 文件描述符数组
 
   ListElem general_tag;
   ListElem all_list_tag;

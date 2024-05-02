@@ -1,20 +1,20 @@
 #include "console.h"
 #include "debug.h"
+#include "fs.h"
 #include "func.h"
 #include "ide.h"
 #include "interrupt.h"
 #include "ioqueue.h"
 #include "keyboard.h"
-#include "memory.h"
+#include "loscall.h"
+#include "losmemory.h"
 #include "print.h"
 #include "process.h"
 #include "stdio.h"
 #include "syscall-init.h"
-#include "loscall.h"
 #include "thread.h"
 #include "time.h"
 #include "tss.h"
-#include "fs.h"
 
 int prog_a_pid = 0, prog_b_pid = 0;
 

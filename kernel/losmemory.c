@@ -1,4 +1,4 @@
-#include "memory.h"
+#include "losmemory.h"
 #include "debug.h"
 #include "func.h"
 #include "global.h"

@@ -1,6 +1,6 @@
 #include "syscall-init.h"
 #include "console.h"
-#include "memory.h"
+#include "losmemory.h"
 #include "print.h"
 #include "string.h"
 #include "thread.h"

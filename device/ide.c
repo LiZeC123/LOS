@@ -5,7 +5,6 @@
 #include "interrupt.h"
 #include "io.h"
 #include "list.h"
-#include "memory.h"
 #include "stdio.h"
 #include "string.h"
 #include "sync.h"

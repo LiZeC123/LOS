@@ -2,7 +2,6 @@
 #include "debug.h"
 #include "func.h"
 #include "interrupt.h"
-#include "memory.h"
 #include "print.h"
 #include "process.h"
 #include "string.h"
@@ -48,6 +47,7 @@ static pid_t allocate_pid(void) {
   return next_pid;
 }
 
+// 初始化线程指针（PCB），线程名称，线程优先级
 void init_thread(TaskStruct *pthread, char *name, int prio) {
   memset(pthread, 0, sizeof(*pthread));
   strcpy(pthread->name, name);
@@ -64,6 +64,17 @@ void init_thread(TaskStruct *pthread, char *name, int prio) {
   pthread->elapsed_ticks = 0;
   pthread->self_kstack = (uint32_t *)((uint32_t)pthread + PG_SIZE);
   pthread->pgdir = NULL;
+
+  // 预留标准输入输出
+  pthread->fd_table[0] = 0;
+  pthread->fd_table[1] = 1;
+  pthread->fd_table[2] = 2;
+  // 其余的全置为 -1
+  uint8_t fd_idx = 3;
+  while (fd_idx < MAX_FILES_OPEN_PER_PROC) {
+    pthread->fd_table[fd_idx] = -1;
+    fd_idx++;
+  }
 
   pthread->stack_magic = STACK_MAGIC;
 }

@@ -2,21 +2,22 @@
 #include "bitmap.h"
 #include "list.h"
 #include "stdint.h"
+#include "superblock.h"
 #include "sync.h"
 
 struct disk;
 
 // 分区结构
 typedef struct partition {
-  uint32_t start_lba;     // 起始扇区
-  uint32_t sec_cnt;       // 扇区数
-  struct disk *my_disk;   // 分区所属的硬盘
-  ListElem part_tag;      // 用于队列中的标记
-  char name[8];           // 分区名称
-  struct super_block *sb; // 本分区的超级块
-  BitMap block_bitmap;    // 块位图
-  BitMap inode_bitmap;    // inode 位图
-  List open_inodes;       // 本分区打开的 i 结点队列
+  uint32_t start_lba;   // 起始扇区
+  uint32_t sec_cnt;     // 扇区数
+  struct disk *my_disk; // 分区所属的硬盘
+  ListElem part_tag;    // 用于队列中的标记
+  char name[8];         // 分区名称
+  SuperBlock *sb;       // 本分区的超级块
+  BitMap block_bitmap;  // 块位图
+  BitMap inode_bitmap;  // inode 位图
+  List open_inodes;     // 本分区打开的 i 结点队列
 } Partition;
 
 // 硬盘结构
@@ -42,4 +43,3 @@ typedef struct ide_channel {
 void ide_init();
 void ide_read(Disk *hd, uint32_t lba, void *buf, uint32_t sec_cnt);
 void ide_write(Disk *hd, uint32_t lba, void *buf, uint32_t sec_cnt);
-
