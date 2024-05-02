@@ -15,6 +15,7 @@
 #include "thread.h"
 #include "time.h"
 #include "tss.h"
+#include "string.h"
 
 int prog_a_pid = 0, prog_b_pid = 0;
 
@@ -129,11 +130,26 @@ int main() {
   process_execute(u_prog_b, "u_prog_b");
   thread_start("k_thread_a", 31, k_thread_a, "I am thread_a");
   thread_start("k_thread_b", 31, k_thread_b, "I am thread_b");
+
   uint32_t fd = sys_open("/file1", O_RDWR);
-  printf("fd:%d\n", fd);
-  sys_write(fd, "hello world\n", 12);
+  printf("open /file1 fd:%d\n", fd);
+
+  char buf[64] = {0};
+  int read_bytes = sys_read(fd, buf, 6);
+  printf("1_ read %d byte:\n%s\n", read_bytes, buf);
+
+  memset(buf, 0, 64);
+  read_bytes = sys_read(fd, buf, 12);
+  printf("2_ read %d byte:\n%s\n", read_bytes, buf);
+
   sys_close(fd);
-  printf("%d closed now \n", fd);
+  printf("%d closed now and reopen \n", fd);
+
+  fd = sys_open("/file1", O_RDWR);
+  memset(buf, 0, 64);
+  read_bytes = sys_read(fd, buf, 10);
+  printf("3_ read %d byte:\n%s\n", read_bytes, buf);
+
   while (1)
     ;
 
