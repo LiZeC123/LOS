@@ -133,15 +133,75 @@ static void partition_format(Partition *part) {
   sys_free(buf);
 }
 
+// 默认情况下操作的是哪个分区
+Partition *cur_part;
+
+// 在分区链表中找到名为 part_name 的分区, 并将其指针赋值给 cur_part
+static bool mount_partition(ListElem *pelem, int arg) {
+  char *part_name = (char *)arg;
+  Partition *part = elem2entry(Partition, part_tag, pelem);
+  if (!strcmp(part->name, part_name)) {
+    cur_part = part;
+    Disk *hd = cur_part->my_disk;
+
+    // sb_buf 用来存储从硬盘上读入的超级块
+    SuperBlock *sb_buf = (SuperBlock *)sys_malloc(SECTOR_SIZE);
+
+    // 在内存中创建分区 cur_part 的超级块
+    cur_part->sb = (SuperBlock *)sys_malloc(sizeof(SuperBlock));
+    if (cur_part->sb == NULL) {
+      PANIC("alloc memory failed!");
+    }
+
+    // 读入超级块
+    memset(sb_buf, 0, SECTOR_SIZE);
+    ide_read(hd, cur_part->start_lba + 1, sb_buf, 1);
+
+    // 把 sb_buf 中超级块的信息复制到分区的超级块 sb 中
+    memcpy(cur_part->sb, sb_buf, sizeof(SuperBlock));
+
+    // 将硬盘上的块位图读入到内存
+    cur_part->block_bitmap.bits =
+        (uint8_t *)sys_malloc(sb_buf->block_bitmap_sects * SECTOR_SIZE);
+    if (cur_part->block_bitmap.bits == NULL) {
+      PANIC("alloc memory failed!");
+    }
+    cur_part->block_bitmap.btmp_bytes_len =
+        sb_buf->block_bitmap_sects * SECTOR_SIZE;
+    // 从硬盘上读入块位图到分区的 block_bitmap.bits
+    ide_read(hd, sb_buf->block_bitmap_lba, cur_part->block_bitmap.bits,
+             sb_buf->block_bitmap_sects);
+
+    // 将硬盘上的 inode 位图读入到内存
+    cur_part->inode_bitmap.bits =
+        (uint8_t *)sys_malloc(sb_buf->inode_bitmap_sects * SECTOR_SIZE);
+    if (cur_part->inode_bitmap.bits == NULL) {
+      PANIC("alloc memory failed!");
+    }
+    cur_part->inode_bitmap.btmp_bytes_len =
+        sb_buf->inode_bitmap_sects * SECTOR_SIZE;
+    // 从硬盘上读入 inode 位图到分区的 inode_bitmap.bits
+    ide_read(hd, sb_buf->inode_bitmap_lba, cur_part->inode_bitmap.bits,
+             sb_buf->inode_bitmap_sects);
+
+    list_init(&cur_part->open_inodes);
+    printk("mount %s done!\n", part->name);
+
+    return true; // 使 list_traversal 停止遍历
+  }
+  return false; // 使 list_traversal 继续遍历
+}
+
 extern uint8_t channel_cnt; // ide文件定义: 按硬盘数计算的通道数
 extern IdeChannel channels[2]; // ide文件定义: 有两个ide通道
+extern List partition_list;    // ide文件定义: 分区队列
 
 // 在磁盘上搜索文件系统, 若没有则格式化分区创建文件系统
 void filesys_init() {
   uint8_t channel_no = 0, dev_no, part_idx = 0;
 
   // sb_buf 用来存储从硬盘上读入的超级块
-  struct super_block *sb_buf = (struct super_block *)sys_malloc(SECTOR_SIZE);
+  SuperBlock *sb_buf = (SuperBlock *)sys_malloc(SECTOR_SIZE);
 
   if (sb_buf == NULL) {
     PANIC("alloc memory failed!");
@@ -154,8 +214,8 @@ void filesys_init() {
         dev_no++;
         continue;
       }
-      struct disk *hd = &channels[channel_no].devices[dev_no];
-      struct partition *part = hd->prim_parts;
+      Disk *hd = &channels[channel_no].devices[dev_no];
+      Partition *part = hd->prim_parts;
       while (part_idx < 12) { // 4 个主分区 + 8 个逻辑分区
         if (part_idx == 4) {  // 开始处理逻辑分区
           part = hd->logic_parts;
@@ -181,4 +241,9 @@ void filesys_init() {
     channel_no++; // 下一通道
   }
   sys_free(sb_buf);
+
+  // 确定默认操作的分区
+  char default_part[8] = "sdb1";
+  // 挂载分区
+  list_traversal(&partition_list, mount_partition, (int)default_part);
 }
