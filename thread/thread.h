@@ -102,3 +102,4 @@ void thread_create(TaskStruct *pthread, thread_func func, void *args);
 void init_thread(TaskStruct *pthread, char *name, int prio);
 
 pid_t fork_pid();
+void sys_ps(void);

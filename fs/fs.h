@@ -6,7 +6,7 @@
 #define BITS_PER_SECTOR 4096    // 每扇区的位数
 #define SECTOR_SIZE 512         // 扇区字节大小
 #define BLOCK_SIZE SECTOR_SIZE  // 块字节大小
-#define MAX_PATH_LEN 64         // 最大路径长度
+#define MAX_PATH_LEN 128         // 最大路径长度
 
 // 文件类型
 typedef enum file_types {
@@ -54,3 +54,4 @@ int32_t sys_rmdir(const char *pathname);
 char *sys_getcwd(char *buf, uint32_t size);
 int32_t sys_chdir(const char *path);
 int32_t sys_stat(const char *path, struct stat *buf);
+char *path_parse(char *pathname, char *name_store);

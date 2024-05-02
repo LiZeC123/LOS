@@ -59,7 +59,7 @@ int main() {
   init_all();
 
   cls_screen();
-  console_put_str("lizec@LOS:/$");
+  console_put_str("[lizec@LOS /]$ ");
 
   // 准备就绪再开启中断, 允许线程被调度
   intr_enable();

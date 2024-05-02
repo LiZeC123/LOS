@@ -33,7 +33,7 @@ kernel.bin: console.o ide.o ioqueue.o keyboard.o time.o \
 			bitmap.o list.o print2.o print.o \
 			debug.o loscall.o \
 			stdio.o string.o \
-			shell.o \
+			buildin_cmd.o shell.o \
 			switch.o sync.o thread.o \
 			fork.o process.o  tss.o     
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
@@ -106,6 +106,9 @@ stdio.o: lib/stdio.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 string.o: lib/string.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+buildin_cmd.o : shell/buildin_cmd.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
 shell.o : shell/shell.c

@@ -438,9 +438,8 @@ void *sys_malloc(uint32_t size) {
       a->cnt = page_cnt;
       a->large = true;
       lock_release(&mem_pool->lock);
-      return (
-          void *)(a +
-                  1); // 跨过 1个 Arena 结构体, 即返回跳过头部的剩余内存起始地址
+      // 跨过 1个 Arena 结构体, 即返回跳过头部的剩余内存起始地址
+      return (void *)(a + 1);
     } else {
       lock_release(&mem_pool->lock);
       return NULL;

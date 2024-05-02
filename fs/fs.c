@@ -196,7 +196,7 @@ static bool mount_partition(ListElem *pelem, int arg) {
 }
 
 // 将最上层路径名称解析出来
-static char *path_parse(char *pathname, char *name_store) {
+char *path_parse(char *pathname, char *name_store) {
   // 根目录不需要单独解析
   if (pathname[0] == '/') {
     // 路径中出现 1 个或多个连续的字符 '/', 将这些 '/' 跳过
@@ -522,8 +522,12 @@ int32_t sys_unlink(const char *pathname) {
 
 // 创建目录 pathname, 成功返回 0, 失败返回 -1
 int32_t sys_mkdir(const char *pathname) {
+  printk("In sys_mkdir\n");
   uint8_t rollback_step = 0; // 用于操作失败时回滚各资源状态
   void *io_buf = sys_malloc(SECTOR_SIZE * 2);
+
+  printk("After sys_malloc 1\n");
+  
   if (io_buf == NULL) {
     printk("sys_mkdir: sys_malloc for io_buf failed\n");
     return -1;
