@@ -112,7 +112,7 @@ static void *vaddr_get(PoolType t, uint32_t pages) {
     }
 
     for (uint32_t cnt = 0; cnt < pages; cnt++) {
-      bitmap_set(&kernel_vaddr.vaddr_map, bit_idx_start + cnt, 1);
+      bitmap_set(&cur->userprog_vaddr.vaddr_map, bit_idx_start + cnt, 1);
     }
     vaddr_start = cur->userprog_vaddr.vaddr_start + bit_idx_start * PG_SIZE;
 
