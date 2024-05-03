@@ -41,6 +41,7 @@ enum SYSCALL_NR { // 用来存放子功能号
   SYS_PS,
 
   SYS_STAT = 106,
+  SYS_TEST,
 
 };
 
@@ -81,3 +82,5 @@ DirEntry *readdir(Dir *dir);
 void rewinddir(Dir *dir);
 void ps(void);
 int32_t stat(const char *path, struct stat *buf);
+
+void do_user_test_call();

@@ -526,8 +526,6 @@ int32_t sys_mkdir(const char *pathname) {
   uint8_t rollback_step = 0; // 用于操作失败时回滚各资源状态
   void *io_buf = sys_malloc(SECTOR_SIZE * 2);
 
-  printk("After sys_malloc 1\n");
-  
   if (io_buf == NULL) {
     printk("sys_mkdir: sys_malloc for io_buf failed\n");
     return -1;

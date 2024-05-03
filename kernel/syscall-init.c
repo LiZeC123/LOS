@@ -4,10 +4,11 @@
 #include "fs.h"
 #include "losmemory.h"
 #include "print.h"
+#include "stdio.h"
 #include "string.h"
 #include "thread.h"
 
-#define SYS_CALL_MAX 32 // 最大支持的系统子功能调用数
+#define SYS_CALL_MAX 256 // 最大支持的系统子功能调用数
 typedef void *syscall;
 syscall syscall_table[SYS_CALL_MAX];
 
@@ -17,6 +18,25 @@ uint32_t sys_getpid(void) { return running_thread()->pid; }
 void sys_clear() { cls_screen(); }
 
 void sys_putchar(char char_ascii) { put_char(char_ascii); }
+
+void sys_do_user_test_call() {
+  void *p = sys_malloc(512);
+  printk("malloc: %x\n", p);
+  p = sys_malloc(512);
+  printk("malloc: %x\n", p);
+  p = sys_malloc(512);
+  printk("malloc: %x\n", p);
+  p = sys_malloc(512);
+  printk("malloc: %x\n", p);
+  p = sys_malloc(512);
+  printk("malloc: %x\n", p);
+  p = sys_malloc(512);
+  printk("malloc: %x\n", p);
+  p = sys_malloc(512);
+  printk("malloc: %x\n", p);
+  p = sys_malloc(512);
+  printk("malloc: %x\n", p);
+}
 
 // 初始化系统调用
 void syscall_init(void) {
@@ -57,6 +77,8 @@ void syscall_init(void) {
   syscall_table[SYS_PS] = sys_ps;
 
   syscall_table[SYS_STAT] = sys_stat;
+
+  syscall_table[SYS_TEST] = sys_do_user_test_call;
 
   put_str("syscall_init done\n");
 }

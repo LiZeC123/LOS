@@ -122,3 +122,5 @@ void ps(void) { _syscall0(SYS_PS); }
 int32_t stat(const char *path, struct stat *buf) {
   return _syscall2(SYS_STAT, path, buf);
 }
+
+void do_user_test_call() { _syscall0(SYS_TEST); }
