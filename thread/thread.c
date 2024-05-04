@@ -94,7 +94,7 @@ TaskStruct *thread_start(char *name, int prio, thread_func func, void *args) {
   ASSERT(!list_find(&thread_ready_list, &thread->general_tag));
   list_append(&thread_ready_list, &thread->general_tag);
 
-  ASSERT(!list_find(&thread_all_list, &thread->all_list_tag))
+  ASSERT(!list_find(&thread_all_list, &thread->all_list_tag));
   list_append(&thread_all_list, &thread->all_list_tag);
 
   return thread;
@@ -105,7 +105,7 @@ static void make_main_thread() {
   init_thread(main_thread, "main", 31);
 
   // 主线程已经运行, 因此仅进入all队列
-  ASSERT(!list_find(&thread_all_list, &main_thread->all_list_tag))
+  ASSERT(!list_find(&thread_all_list, &main_thread->all_list_tag));
   list_append(&thread_all_list, &main_thread->all_list_tag);
 }
 

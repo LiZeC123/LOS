@@ -57,13 +57,13 @@ typedef struct {
 typedef int16_t pid_t;
 
 #define MAX_FILES_OPEN_PER_PROC 8
-
+#define TASK_NAME_LEN 16
 typedef struct {
   uint32_t *self_kstack; // 线程的内核栈
   pid_t pid;
   TaskStatus status;
   uint8_t priority;
-  char name[16];
+  char name[TASK_NAME_LEN];
 
   uint8_t ticks;
   uint32_t elapsed_ticks;
