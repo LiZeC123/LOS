@@ -35,7 +35,7 @@ kernel.bin: console.o ide.o ioqueue.o keyboard.o time.o \
 			stdio.o string.o \
 			buildin_cmd.o shell.o \
 			switch.o sync.o thread.o \
-			fork.o process.o  tss.o     
+			exec.o fork.o process.o tss.o     
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 
@@ -123,6 +123,9 @@ sync.o: thread/sync.c
 thread.o: thread/thread.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
+exec.o: userprog/exec.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
+
 fork.o: userprog/fork.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
@@ -143,4 +146,14 @@ hd80M.img:
 clear:
 	rm -f *.bin
 	rm -f *.o
-	
+
+
+# 编译运行时静态库, 使得第三方程序可使用相关的系统调用
+crt: DEBUG += -D NODEBUG
+crt: clear crt.a
+
+start.o: command/start.S
+	nasm -f elf command/start.S -o ./start.o
+
+crt.a: stdio.o loscall.o string.o start.o
+	ar rcs ./command/crt.a stdio.o loscall.o string.o start.o

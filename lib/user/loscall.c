@@ -41,6 +41,9 @@
     retval;                                                                    \
   })
 
+// 退出当前进程
+void exit(int32_t code) { _syscall1(SYS_EXIT, code); }
+
 // 复制当前进程, 分裂为两个进程
 pid_t fork() { return _syscall0(SYS_FORK); }
 
@@ -64,6 +67,10 @@ int32_t close(int32_t fd) { return _syscall1(SYS_CLOSE, fd); }
 
 // 删除文件
 int32_t unlink(const char *pathname) { return _syscall1(SYS_UNLINK, pathname); }
+
+void execv(const char *path, char *argv[]) {
+  _syscall2(SYS_EXECVE, path, argv);
+}
 
 // 设置文件偏移量
 int32_t lseek(int32_t fd, int32_t offset, uint8_t whence) {

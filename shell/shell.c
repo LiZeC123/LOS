@@ -154,7 +154,25 @@ void my_shell(void) {
     } else if (!strcmp("rm", argv[0])) {
       buildin_rm(argc, argv);
     } else {
-      printf("external command\n");
+      int32_t pid = fork();
+      if (pid) { // 父进程
+        while (1)
+          ;
+      } else {
+        make_clear_abs_path(argv[0], final_path);
+        argv[0] = final_path;
+
+        /* 先判断下文件是否存在 */
+        struct stat file_stat;
+        memset(&file_stat, 0, sizeof(struct stat));
+        if (stat(argv[0], &file_stat) == -1) {
+          printf("my_shell: cannot access %s: No such file or directory\n",
+                 argv[0]);
+          exit(-1);
+        } else {
+          execv(argv[0], argv);
+        }
+      }
     }
   }
 

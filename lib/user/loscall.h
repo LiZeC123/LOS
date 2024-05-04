@@ -6,6 +6,7 @@
 
 enum SYSCALL_NR { // 用来存放子功能号
   SYS_RESTART,
+  SYS_EXIT,
   SYS_FORK,
   SYS_READ,
   SYS_WRITE,
@@ -22,7 +23,7 @@ enum SYSCALL_NR { // 用来存放子功能号
 
   SYS_MOUNT,
   SYS_UMOUNT,
-  
+
   SYS_MALLOC,
   SYS_FREE,
   SYS_PUTCHAR,
@@ -47,6 +48,7 @@ enum SYSCALL_NR { // 用来存放子功能号
 
 // SYS_RESTART
 
+void exit(int32_t code);
 pid_t fork();
 int32_t read(int32_t fd, void *buf, uint32_t count);
 uint32_t write(int32_t fd, const void *buf, uint32_t count);
@@ -59,7 +61,7 @@ int32_t close(int32_t fd);
 
 int32_t unlink(const char *pathname);
 
-// SYS_EXECVE
+void execv(const char *path, char *argv[]);
 
 int32_t lseek(int32_t fd, int32_t offset, uint8_t whence);
 uint32_t getpid(void);
