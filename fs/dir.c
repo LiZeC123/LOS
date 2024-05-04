@@ -2,7 +2,7 @@
 #include "debug.h"
 #include "file.h"
 #include "ide.h"
-#include "stdio.h"
+#include "print.h"
 #include "string.h"
 
 Dir root_dir; // 根目录

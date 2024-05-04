@@ -1,6 +1,6 @@
 #include "fs.h"
-#include "../lib/stdio.h"
-#include "../lib/string.h"
+#include "print.h"
+#include "string.h"
 #include "console.h"
 #include "debug.h"
 #include "dir.h"

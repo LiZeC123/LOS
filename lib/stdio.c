@@ -1,5 +1,4 @@
 #include "stdio.h"
-#include "console.h"
 #include "loscall.h"
 #include "string.h"
 
@@ -85,14 +84,4 @@ uint32_t printf(const char *format, ...) {
   vsprintf(buf, format, args);
   va_end(args);
   return write(1, buf, strlen(buf));
-}
-
-// 供内核使用的格式化输出函数
-void printk(const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  char buf[1024] = {0};
-  vsprintf(buf, format, args);
-  va_end(args);
-  console_put_str(buf);
 }

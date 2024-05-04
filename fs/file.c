@@ -3,7 +3,7 @@
 #include "fs.h"
 #include "ide.h"
 #include "interrupt.h"
-#include "stdio.h"
+#include "print.h"
 #include "string.h"
 #include "thread.h"
 

@@ -117,7 +117,7 @@ static void *vaddr_get(PoolType t, uint32_t pages) {
     vaddr_start = cur->userprog_vaddr.vaddr_start + bit_idx_start * PG_SIZE;
 
     // 用户的3级栈初始位于3GB以下的最后1页, 因此虚拟地址不应该分配到此位置
-    ASSERT((uint32_t)vaddr_start < (0xC0000000 - PG_SIZE))
+    ASSERT((uint32_t)vaddr_start < (0xC0000000 - PG_SIZE));
   }
 
   return (void *)vaddr_start;
