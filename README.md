@@ -8,6 +8,9 @@ LOS操作系统
 
 LOS是一个操作系统, 用于学习操作系统的基本理论. LOS可在Linux环境下编译, 并在Bochs中运行. 系统提供基本的Shell指令并支持运行ELF格式的可执行文件.
 
+![系统执行示例](doc/images/执行用户进程.PNG)
+
+
 > 特别地, 本系统支持运行[LSC编译组件](https://github.com/LiZeC123/LSC)编译的可执行程序, 可查看[操作文档](doc/0x81使用LCS编译用户程序.md)
 
 
