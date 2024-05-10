@@ -52,7 +52,7 @@ static void idt_desc_init() {
   // 单独注册 系统调用的中断
   make_idt_desc(&idt[0x80], IDT_DESC_ATTR_DPL3, syscall_handler);
 
-  put_str("  idt_desc_init done\n");
+  put_str(".");
 }
 
 static void general_intr_handler(uint8_t vec_nr) {
@@ -129,7 +129,7 @@ static void pic_init() {
   // outb(PIC_M_DATA, 0xfd);
   // outb(PIC_S_DATA, 0xff);
 
-  put_str("  pic_init done\n");
+  put_str(".");
 }
 
 #define EFLAGS_IF 0x00000200
@@ -165,7 +165,7 @@ IntrStatus intr_set_status(IntrStatus status) {
 }
 
 void idt_init() {
-  put_str("idt_init start\n");
+  put_str("idt_init . ");
   idt_desc_init();
   exception_init();
   pic_init();
@@ -175,5 +175,5 @@ void idt_init() {
   uint64_t idt_operand = (sizeof(idt) - 1) | ((uint64_t)(uint32_t)idt) << 16;
   __asm__ __volatile__("lidt %0" : : "m"(idt_operand));
 
-  put_str("idt_init done\n");
+  put_str(" done\n");
 }

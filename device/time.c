@@ -64,9 +64,9 @@ void mtime_sleep(uint32_t m_seconds) {
 
 
 void time_init() {
-  put_str("timer_init start\n");
+  put_str("timer_init ... ");
   frequency_set(COUNTER0_PORT, COUNTER0_NO, READ_WRITE_LATCH, COUNTER_MODE,
                 COUNTER0_VALUE);
   register_handler(0x20, intr_timer_handler);
-  put_str("timer_init done\n");
+  put_str("done\n");
 }

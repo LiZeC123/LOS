@@ -42,7 +42,7 @@ void sys_empty_call() { printk("Empty Sys Call\n"); }
 
 // 初始化系统调用
 void syscall_init(void) {
-  put_str("syscall_init start\n");
+  put_str("syscall_init ... ");
   syscall_table[SYS_RESTART] = sys_empty_call;
   syscall_table[SYS_EXIT] = sys_empty_call;
   syscall_table[SYS_FORK] = sys_fork;
@@ -83,5 +83,5 @@ void syscall_init(void) {
 
   syscall_table[SYS_TEST] = sys_do_user_test_call;
 
-  put_str("syscall_init done\n");
+  put_str("done\n");
 }

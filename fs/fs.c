@@ -188,7 +188,7 @@ static bool mount_partition(ListElem *pelem, int arg) {
              sb_buf->inode_bitmap_sects);
 
     list_init(&cur_part->open_inodes);
-    printk("mount %s done!\n", part->name);
+    // printk("mount %s done!\n", part->name);
 
     return true; // 使 list_traversal 停止遍历
   }
@@ -891,7 +891,7 @@ void filesys_init() {
   if (sb_buf == NULL) {
     PANIC("alloc memory failed!");
   }
-  printk("searching filesystem......\n");
+  // printk("searching filesystem......\n");
   while (channel_no < channel_cnt) {
     dev_no = 0;
     while (dev_no < 2) {
@@ -911,7 +911,7 @@ void filesys_init() {
           ide_read(hd, part->start_lba + 1, sb_buf, 1);
 
           if (sb_buf->magic == 0x19590318) {
-            printk("%s has filesystem\n", part->name);
+            // printk("%s has filesystem\n", part->name);
           } else { // 其它文件系统不支持, 一律按无文件系统处理
             printk("formatting %s's partition %s......\n", hd->name,
                    part->name);

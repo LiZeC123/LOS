@@ -116,6 +116,7 @@ int32_t argc = -1;
 
 /* 简单的shell */
 void my_shell(void) {
+  printf("\n\nWelcome to Lizec Operate System\n");
   cwd_cache[0] = '/';
   cwd_cache[1] = 0;
   while (1) {

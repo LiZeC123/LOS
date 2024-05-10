@@ -260,13 +260,15 @@ static void identify_disk(Disk *hd) {
   char buf[64];
   uint8_t sn_start = 10 * 2, sn_len = 20, md_start = 27 * 2, md_len = 40;
   swap_pairs_bytes(&id_info[sn_start], buf, sn_len);
-  printk("    disk %s info:\n     SN: %s\n", hd->name, buf);
+  buf[10] = '\0';
+  printk("disk %s info\n  SN: %s", hd->name, buf);
   memset(buf, 0, sizeof(buf));
   swap_pairs_bytes(&id_info[md_start], buf, md_len);
-  printk("    MODULE: %s\n", buf);
+  buf[14] = '\0';
+  printk("  MODULE: %s", buf);
   uint32_t sectors = *(uint32_t *)&id_info[60 * 2];
-  printk("    SECTORS: %d\n", sectors);
-  printk("    CAPACITY: %dMB\n", sectors * 512 / 1024 / 1024);
+  printk("  SECTORS: %d", sectors);
+  printk("  CAPACITY: %dMB\n", sectors * 512 / 1024 / 1024);
 }
 
 // 扫描硬盘 hd 中地址为 ext_lba 的扇区中的所有分区
@@ -326,7 +328,6 @@ static bool partition_info(ListElem *pelem, int arg) {
 
 // 硬盘数据结构初始化
 void ide_init() {
-  printk("ide_init start\n");
   uint8_t hd_cnt = *((uint8_t *)(0x475)); // 获取硬盘的数量
   ASSERT(hd_cnt > 0);
   // list_init(&partition_list);
@@ -365,7 +366,7 @@ void ide_init() {
       hd->my_channel = channel;
       hd->dev_no = dev_no;
       sprintf(hd->name, "sd%c", 'a' + channel_no * 2 + dev_no);
-      identify_disk(hd);       // 获取硬盘参数
+      identify_disk(hd);       // 获取并输出硬盘参数
       if (dev_no != 0) {       // 内核本身的裸硬盘(hd60M.img)不处理
         partition_scan(hd, 0); // 扫描该硬盘上的分区
       }
@@ -376,8 +377,7 @@ void ide_init() {
 
     channel_no++; // 下一个 channel
   }
-  printk("\n  all partition info\n");
-  // 打印所有分区信息
-  list_traversal(&partition_list, partition_info, (int)NULL);
-  printk("ide_init done\n");
+  // printk("\n  all partition info\n");
+  // // 打印所有分区信息
+  // list_traversal(&partition_list, partition_info, (int)NULL);
 }

@@ -34,18 +34,13 @@ VirtualAddr kernel_vaddr; // 管理内核虚拟地址分配
 #define PTE_IDX(addr) ((addr & 0x003ff000) >> 12)
 
 static void print_pool(const Pool *pool, const char *name) {
-  put_str(name);
-  next_line();
-
-  PRINTLINE("    Size: ", pool->size);
-  PRINTLINE("    Phy_start: ", pool->phy_addr_start);
-  PRINTLINE("    Bitmap_start:", (unsigned int)pool->pool_map.bits);
-  PRINTLINE("    Bitmap_size:", pool->pool_map.btmp_bytes_len);
+  printk("%s: Size: %dKB Phy_start: 0x%x\n  Bitmap_start: 0x%x Bitmap_size: %d "
+         "Byte\n",
+         name, pool->size / 1024, pool->phy_addr_start,
+         (unsigned int)pool->pool_map.bits, pool->pool_map.btmp_bytes_len);
 }
 
 static void mem_pool_init(uint32_t all_mem) {
-  put_str("  mem_pool_init start\n");
-
   // 计算当前页表已经使用的空间
   // 1个页目录表(1页)+页目录第0项和第0x301项指向的页表(1页)+内核空间245项页目录项指向的页表(254页)
   // 因此当前页表数据正好使用了256页, 即1M内存空间
@@ -74,8 +69,8 @@ static void mem_pool_init(uint32_t all_mem) {
   user_pool.pool_map.btmp_bytes_len = ubm_length;
   user_pool.pool_map.bits = (void *)(MEM_BITMAP_BASE + kbm_length);
 
-  print_pool(&kernel_pool, "  Kernel Pool:");
-  print_pool(&user_pool, "  User Pool:");
+  print_pool(&kernel_pool, "Kernel Pool");
+  print_pool(&user_pool, "User Pool");
 
   bitmap_init(&kernel_pool.pool_map);
   bitmap_init(&user_pool.pool_map);
@@ -86,8 +81,6 @@ static void mem_pool_init(uint32_t all_mem) {
 
   kernel_vaddr.vaddr_start = K_HEAP_START;
   bitmap_init(&kernel_vaddr.vaddr_map);
-
-  put_str("  mem_pool_init done\n");
 }
 
 // 从虚拟内存池中申请内存页
@@ -552,7 +545,6 @@ void *get_a_page_without_opvaddrbitmap(PoolType pf, uint32_t vaddr) {
 }
 
 void mem_init() {
-  put_str("mem_init start\n");
   // 在loader.S中使用BIOS方法获取了可用内存大小, 并写入total_men_bytes位置
   // 该位置为 LOADER_BASE_ADDR + 0x200 = 0x900 + 0x200 = 0xb00
   // 直接读取该位置数据, 即可获得可用内存大小
@@ -561,5 +553,4 @@ void mem_init() {
   lock_init(&kernel_pool.lock);
   lock_init(&user_pool.lock);
   block_desc_init(k_block_descs);
-  put_str("mem_init done\n");
 }

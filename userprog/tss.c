@@ -61,7 +61,7 @@ static GdtDesc make_gdt_desc(uint32_t *desc_addr, uint32_t limit,
 
 // 在 gdt 中创建 tss 并重新加载 gdt
 void tss_init() {
-  put_str("tss_init start\n");
+  put_str("tss_init ...");
   uint32_t tss_size = sizeof(tss);
   memset(&tss, 0, tss_size);
   tss.ss0 = SELECTOR_K_STACK;
@@ -81,5 +81,5 @@ void tss_init() {
   uint64_t gdt_operand = ((8 * 7 - 1) | ((uint64_t)(uint32_t)0xc0000900 << 16));
   __asm__ __volatile__("lgdt %0" : : "m"(gdt_operand));
   __asm__ __volatile__("ltr %w0" : : "r"(SELECTOR_TSS));
-  put_str("tss_init and ltr done\n");
+  put_str("done\n");
 }

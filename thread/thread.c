@@ -269,12 +269,12 @@ void sys_ps(void) {
 void init();
 
 void thread_init() {
-  put_str("thread_init start\n");
+  put_str("thread_init ... ");
   list_init(&thread_all_list);
   list_init(&thread_ready_list);
   lock_init(&pid_lock);
   process_execute(init, "init");
   make_main_thread();
   idle_thread = thread_start("idle", 10, idle, NULL);
-  put_str("thread_init done\n");
+  put_str("done\n");
 }
