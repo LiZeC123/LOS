@@ -35,7 +35,7 @@ kernel.bin: console.o ide.o ioqueue.o keyboard.o time.o \
 			stdio.o string.o \
 			buildin_cmd.o shell.o \
 			switch.o sync.o thread.o \
-			exec.o fork.o process.o tss.o     
+			exec.o fork.o process.o tss.o wait_exit.o     
 	ld -Ttext 0xc0001500 -e main -o $@ -m elf_i386 $^
 	dd $(DDFLAGS)  if=$@ count=200 seek=9
 
@@ -135,6 +135,8 @@ process.o: userprog/process.c
 tss.o: userprog/tss.c	
 	$(CC) $(CFLAGS) -c -o $@ $^
 
+wait_exit.o: userprog/wait_exit.c	
+	$(CC) $(CFLAGS) -c -o $@ $^
 
 # 创建一个60M大小的扇区大小为512字节的平坦模式的硬盘文件
 hd60M.img:
@@ -150,10 +152,14 @@ clear:
 
 # 编译运行时静态库, 使得第三方程序可使用相关的系统调用
 crt: DEBUG += -D NODEBUG
+crt: CFLAGS += -no-pie -fno-pic
 crt: clear crt.a
 
 start.o: command/start.S
 	nasm -f elf command/start.S -o ./start.o
 
 crt.a: stdio.o loscall.o string.o start.o
-	ar rcs ./command/crt.a stdio.o loscall.o string.o start.o
+	cp stdio.o   ./command/crt/
+	cp loscall.o ./command/crt/
+	cp string.o  ./command/crt/
+	cp start.o   ./command/crt/
