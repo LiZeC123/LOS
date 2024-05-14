@@ -65,6 +65,9 @@ int32_t open(char *pathname, uint8_t flag) {
 // 关闭文件
 int32_t close(int32_t fd) { return _syscall1(SYS_CLOSE, fd); }
 
+// 等待子进程
+pid_t wait(int32_t *status) { return _syscall1(SYS_WAITPID, status); }
+
 // 删除文件
 int32_t unlink(const char *pathname) { return _syscall1(SYS_UNLINK, pathname); }
 

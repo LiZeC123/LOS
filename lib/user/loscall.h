@@ -55,7 +55,7 @@ uint32_t write(int32_t fd, const void *buf, uint32_t count);
 int32_t open(char *pathname, uint8_t flag);
 int32_t close(int32_t fd);
 
-// SYS_WAITPID
+pid_t wait(int32_t *status);
 // SYS_CREAT
 // SYS_LINK
 

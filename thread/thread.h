@@ -79,6 +79,7 @@ typedef struct {
 
   uint32_t cwd_inode_nr; // 进程所在工作目录的inode编号
   int16_t parent_pid;    // 父进程 pid
+  int8_t exit_status;    // 进程结束时自己调用 exit 传入的参数
   uint32_t stack_magic; // 记录PCB边界信息, 从而可检查是否被破坏
 } TaskStruct;
 
@@ -103,3 +104,6 @@ void init_thread(TaskStruct *pthread, char *name, int prio);
 
 pid_t fork_pid();
 void sys_ps(void);
+
+void thread_exit(TaskStruct *thread_over, bool need_schedule);
+TaskStruct *pid2thread(int32_t pid);

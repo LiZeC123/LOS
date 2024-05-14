@@ -116,7 +116,7 @@ int32_t argc = -1;
 
 /* 简单的shell */
 void my_shell(void) {
-  printf("\n\nWelcome to Lizec Operate System\n");
+  printf("\n\nWelcome to Lizec Operate System\n\n");
   cwd_cache[0] = '/';
   cwd_cache[1] = 0;
   while (1) {
@@ -157,8 +157,13 @@ void my_shell(void) {
     } else {
       int32_t pid = fork();
       if (pid) { // 父进程
-        while (1)
-          ;
+        int32_t status;
+        int32_t child_pid = wait(&status);
+        if (child_pid ==
+            -1) { // 按理说程序正确的话不会执行到这句,fork出的进程便是shell子进程
+          PANIC("my_shell: no child\n");
+        }
+        printf("child_pid %d, it's status: %d\n", child_pid, status);
       } else {
         make_clear_abs_path(argv[0], final_path);
         argv[0] = final_path;

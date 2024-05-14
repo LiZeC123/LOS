@@ -7,6 +7,7 @@
 #include "print.h"
 #include "string.h"
 #include "thread.h"
+#include "wait_exit.h"
 
 #define SYS_CALL_MAX 256 // 最大支持的系统子功能调用数
 typedef void *syscall;
@@ -44,13 +45,13 @@ void sys_empty_call() { printk("Empty Sys Call\n"); }
 void syscall_init(void) {
   put_str("syscall_init ... ");
   syscall_table[SYS_RESTART] = sys_empty_call;
-  syscall_table[SYS_EXIT] = sys_empty_call;
+  syscall_table[SYS_EXIT] = sys_exit;
   syscall_table[SYS_FORK] = sys_fork;
   syscall_table[SYS_READ] = sys_read;
   syscall_table[SYS_WRITE] = sys_write;
   syscall_table[SYS_OPEN] = sys_open;
   syscall_table[SYS_CLOSE] = sys_close;
-  syscall_table[SYS_WAITPID] = sys_empty_call;
+  syscall_table[SYS_WAITPID] = sys_wait;
   syscall_table[SYS_CREAT] = sys_empty_call;
   syscall_table[SYS_LINK] = sys_empty_call;
   syscall_table[SYS_UNLINK] = sys_unlink;

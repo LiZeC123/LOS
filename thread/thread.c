@@ -265,6 +265,54 @@ void sys_ps(void) {
   list_traversal(&thread_all_list, elem2thread_info, 0);
 }
 
+// 回收 thread_over 的 pcb 和页表, 并将其从调度队列中去除
+void thread_exit(TaskStruct *thread_over, bool need_schedule) {
+  // 要保证 schedule 在关中断情况下调用
+  intr_disable();
+  thread_over->status = TASK_DIED;
+
+  // 如果 thread_over 不是当前线程, 就有可能还在就绪队列中, 将其从中删除
+  if (list_find(&thread_ready_list, &thread_over->general_tag)) {
+    list_remove(&thread_over->general_tag);
+  }
+  if (thread_over->pgdir) { // 如果是进程, 回收进程的页表
+    mfree_page(PF_KERNEL, thread_over->pgdir, 1);
+  }
+
+  // 从 all_thread_list 中去掉此任务
+  list_remove(&thread_over->all_list_tag);
+
+  // 回收 pcb 所在的页, 主线程的 pcb 不在堆中, 跨过
+  if (thread_over != main_thread) {
+    mfree_page(PF_KERNEL, thread_over, 1);
+  }
+
+  // // 归还 pid
+  // release_pid(thread_over->pid);
+
+  // 如果需要下一轮调度则主动调用 schedule
+  if (need_schedule) {
+    schedule();
+    PANIC("thread_exit: should not be here\n");
+  }
+}
+
+// 比对任务的 pid
+static bool pid_check(ListElem *pelem, int32_t pid) {
+  TaskStruct *pthread = elem2entry(TaskStruct, all_list_tag, pelem);
+  return pthread->pid == pid;
+}
+
+// 根据 pid 找 pcb, 若找到则返回该 pcb, 否则返回 NULL
+TaskStruct *pid2thread(int32_t pid) {
+  ListElem *pelem = list_traversal(&thread_all_list, pid_check, pid);
+  if (pelem == NULL) {
+    return NULL;
+  }
+  TaskStruct *thread = elem2entry(TaskStruct, all_list_tag, pelem);
+  return thread;
+}
+
 // 声明init函数, 对应的实现在main文件
 void init();
 

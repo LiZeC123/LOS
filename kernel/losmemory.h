@@ -50,3 +50,5 @@ void *get_a_page_without_opvaddrbitmap(PoolType pf, uint32_t vaddr);
 
 uint32_t *pte_ptr(uint32_t vaddr);
 uint32_t *pde_ptr(uint32_t vaddr);
+
+void free_a_phy_page(uint32_t pg_phy_addr);
