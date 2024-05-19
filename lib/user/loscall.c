@@ -134,3 +134,8 @@ int32_t stat(const char *path, struct stat *buf) {
 }
 
 void do_user_test_call() { _syscall0(SYS_TEST); }
+
+// 写入用户程序
+void make_user_prog(char *file_name, uint32_t file_size) {
+  _syscall2(SYS_MKPROG, file_name, file_size);
+}

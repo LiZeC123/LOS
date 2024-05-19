@@ -154,6 +154,8 @@ void my_shell(void) {
       buildin_rmdir(argc, argv);
     } else if (!strcmp("rm", argv[0])) {
       buildin_rm(argc, argv);
+    } else if (!strcmp("mkprog", argv[0])) {
+      buildin_mkprog(argc, argv);
     } else {
       int32_t pid = fork();
       if (pid) { // 父进程

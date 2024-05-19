@@ -3,6 +3,7 @@
 #include "exec.h"
 #include "fork.h"
 #include "fs.h"
+#include "func.h"
 #include "losmemory.h"
 #include "print.h"
 #include "string.h"
@@ -37,6 +38,27 @@ void sys_do_user_test_call() {
   printk("malloc: %x\n", p);
   p = sys_malloc(512);
   printk("malloc: %x\n", p);
+}
+
+// 将内核所在硬盘从300扇区开始的, 指定大小的内容作为文件写入文件系统所在的硬盘
+void sys_make_user_prog(char *file_name, uint32_t file_size) {
+  extern IdeChannel channels[2]; // 有两个ide通道
+
+  uint32_t sec_cnt = DIV_ROUND_UP(file_size, 512);
+  struct disk *sda = &channels[0].devices[0];
+  void *prog_buf = sys_malloc(sec_cnt * 512);
+
+  ide_read(sda, 300, prog_buf, sec_cnt);
+  int32_t fd = sys_open(file_name, O_CREAT | O_RDWR);
+
+  if (fd != -1) {
+    if (sys_write(fd, prog_buf, file_size) == -1) {
+      printk("file write error!\n");
+    }
+  }
+
+  sys_close(fd);  
+  sys_free(prog_buf);
 }
 
 void sys_empty_call() { printk("Empty Sys Call\n"); }
@@ -83,6 +105,7 @@ void syscall_init(void) {
   syscall_table[SYS_STAT] = sys_stat;
 
   syscall_table[SYS_TEST] = sys_do_user_test_call;
+  syscall_table[SYS_MKPROG] = sys_make_user_prog;
 
   put_str("done\n");
 }
