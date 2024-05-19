@@ -1,6 +1,7 @@
 #include "exec.h"
 #include "fs.h"
 #include "func.h"
+#include "interrupt.h"
 #include "losmemory.h"
 #include "string.h"
 #include "thread.h"

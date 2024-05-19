@@ -18,7 +18,8 @@ List thread_all_list;
 
 static ListElem *thread_tag; //
 
-extern void switch_to(TaskStruct *cur, TaskStruct *next);
+// 线程切换函数, 在汇编中实现
+void switch_to(TaskStruct *cur, TaskStruct *next);
 
 static void kernel_thread(thread_func *func, void *args) {
   // 时钟中断进行调度后, 会自动关闭中断

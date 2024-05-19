@@ -4,14 +4,12 @@
 #include "func.h"
 #include "global.h"
 #include "interrupt.h"
-#include "list.h"
 #include "losmemory.h"
 #include "string.h"
+#include "thread.h"
 #include "tss.h"
 
 #define PG_SIZE 4096
-
-extern void intr_exit(void);
 
 void start_process(void *filename_) {
   void *function = filename_;
@@ -85,9 +83,6 @@ void create_user_vaddr_bitmap(TaskStruct *user_prog) {
 
   bitmap_init(&user_prog->userprog_vaddr.vaddr_map);
 }
-
-extern List thread_ready_list;
-extern List thread_all_list;
 
 void process_execute(void *filename, char *name) {
   TaskStruct *thread = get_kernel_pages(1);

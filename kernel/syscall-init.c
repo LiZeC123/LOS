@@ -57,7 +57,7 @@ void sys_make_user_prog(char *file_name, uint32_t file_size) {
     }
   }
 
-  sys_close(fd);  
+  sys_close(fd);
   sys_free(prog_buf);
 }
 

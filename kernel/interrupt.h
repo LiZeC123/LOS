@@ -15,3 +15,6 @@ IntrStatus intr_enable();
 IntrStatus intr_disable();
 
 void register_handler(uint8_t vector_no, intr_handler function);
+
+// 中断返回处理函数, 使用汇编实现, 此处仅声明
+void intr_exit(void);

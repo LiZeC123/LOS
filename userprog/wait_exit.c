@@ -1,7 +1,6 @@
 #include "wait_exit.h"
 #include "debug.h"
 #include "fs.h"
-#include "list.h"
 #include "thread.h"
 
 #define PG_SIZE 4096
@@ -95,9 +94,6 @@ static bool init_adopt_a_child(ListElem *pelem, int32_t pid) {
   }
   return false; // 让list_traversal继续传递下一个元素
 }
-
-extern List thread_ready_list;
-extern List thread_all_list;
 
 /* 等待子进程调用exit,将子进程的退出状态保存到status指向的变量.
  * 成功则返回子进程的pid,失败则返回-1 */

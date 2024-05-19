@@ -1,10 +1,10 @@
 #include "time.h"
 #include "debug.h"
+#include "func.h"
 #include "interrupt.h"
 #include "io.h"
 #include "print.h"
 #include "thread.h"
-#include "func.h"
 
 #define IRQ0_FREQUENCY 100
 #define INPUT_FREQUENCY 1193180
@@ -40,28 +40,24 @@ static void intr_timer_handler() {
   }
 }
 
-#define IRQ0_FREQUENCY	   100
+#define IRQ0_FREQUENCY 100
 #define MS_PER_INTR (1000 / IRQ0_FREQUENCY)
 
 // 以 tick 为单位的 sleep, 任何时间形式的 sleep 会转换此 ticks 形式
 static void ticks_to_sleep(uint32_t sleep_ticks) {
-   uint32_t start_tick = ticks;
-   // 若间隔的 ticks 数不够便让出 cpu
-   while (ticks - start_tick < sleep_ticks) {
-      thread_yield();
-   }
+  uint32_t start_tick = ticks;
+  // 若间隔的 ticks 数不够便让出 cpu
+  while (ticks - start_tick < sleep_ticks) {
+    thread_yield();
+  }
 }
-
-
 
 // 以毫秒为单位的 sleep
 void mtime_sleep(uint32_t m_seconds) {
-   uint32_t sleep_ticks = DIV_ROUND_UP(m_seconds, MS_PER_INTR);
-   ASSERT(sleep_ticks > 0);
-   ticks_to_sleep(sleep_ticks);
+  uint32_t sleep_ticks = DIV_ROUND_UP(m_seconds, MS_PER_INTR);
+  ASSERT(sleep_ticks > 0);
+  ticks_to_sleep(sleep_ticks);
 }
-
-
 
 void time_init() {
   put_str("timer_init ... ");

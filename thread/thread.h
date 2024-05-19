@@ -107,3 +107,7 @@ void sys_ps(void);
 
 void thread_exit(TaskStruct *thread_over, bool need_schedule);
 TaskStruct *pid2thread(int32_t pid);
+
+// 导出线程列表, 以便于其他文件中进行操作
+extern List thread_ready_list;
+extern List thread_all_list;

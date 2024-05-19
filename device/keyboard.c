@@ -204,7 +204,7 @@ static void intr_keyboard_handler(void) {
           (ctrl_down_last && cur_char == 'u')) {
         cur_char -= 'a';
       }
-      
+
       if (!ioq_full(&KeybdBuf)) {
         // put_char(cur_char);
         ioq_putchar(&KeybdBuf, cur_char);

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-extern void intr_exit(void);
+
 typedef uint32_t Elf32_Word, Elf32_Addr, Elf32_Off;
 typedef uint16_t Elf32_Half;
 
