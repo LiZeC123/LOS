@@ -97,15 +97,7 @@ INode *inode_open(Partition *part, uint32_t inode_no) {
   // 包括 inode 所在扇区地址和扇区内的字节偏移量
   inode_locate(part, inode_no, &inode_pos);
 
-  // 为使通过 sys_malloc 创建的新 inode 被所有任务共享
-  // 需要将 inode 置于内核空间, 故需要临时将 cur_pbc->pgdir 置为 NULL
-  TaskStruct *cur = running_thread();
-  uint32_t *cur_pagedir_bak = cur->pgdir;
-  cur->pgdir = NULL;
-  // 以上三行代码完成后下面分配的内存将位于内核区
-  inode_found = (INode *)sys_malloc(sizeof(INode));
-  // 恢复 pgdir
-  cur->pgdir = cur_pagedir_bak;
+  inode_found = malloc_kernal_inode();
 
   char *inode_buf;
   if (inode_pos.two_sec) { // 跨扇区的情况
@@ -125,6 +117,22 @@ INode *inode_open(Partition *part, uint32_t inode_no) {
   return inode_found;
 }
 
+// inode需要被所有任务共享, 必须分配在内核空间
+INode *malloc_kernal_inode() {
+  // 临时将 cur_pbc->pgdir 置为 NULL, 使得内存分配强制在内核空间
+  TaskStruct *cur = running_thread();
+  uint32_t *cur_pagedir_bak = cur->pgdir;
+  cur->pgdir = NULL;
+
+  // 以上三行代码完成后下面分配的内存将位于内核区
+  INode *node = (INode *)sys_malloc(sizeof(INode));
+
+  // 恢复 pgdir
+  cur->pgdir = cur_pagedir_bak;
+
+  return node;
+}
+
 // 关闭 inode 或减少 inode 的打开数
 void inode_close(INode *inode) {
   // 若没有进程再打开此文件, 将此 inode 去掉并释放空间
@@ -139,6 +147,7 @@ void inode_close(INode *inode) {
     uint32_t *cur_pagedir_bak = cur->pgdir;
     cur->pgdir = NULL;
     sys_free(inode);
+    // TODO: INODE可能不是内核分配的, 导致内存错误
     cur->pgdir = cur_pagedir_bak;
   }
   intr_set_status(old_status);

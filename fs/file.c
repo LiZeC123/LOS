@@ -111,7 +111,7 @@ int32_t file_create(Dir *parent_dir, char *filename, uint8_t flag) {
 
   // 此 inode 要从堆中申请内存, 不可生成局部变量(函数退出时会释放)
   // 因为 file_table 数组中的文件描述符的 inode 指针要指向它
-  INode *new_file_inode = (INode *)sys_malloc(sizeof(INode));
+  INode *new_file_inode = malloc_kernal_inode();
   if (new_file_inode == NULL) {
     printk("file_create: sys_malloc for inode failed\n");
     rollback_step = 1;
