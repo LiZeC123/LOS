@@ -106,6 +106,7 @@ void syscall_init(void) {
 
   syscall_table[SYS_TEST] = sys_do_user_test_call;
   syscall_table[SYS_MKPROG] = sys_make_user_prog;
+  syscall_table[SYS_PP] = sys_print_partition_info;
 
   put_str("done\n");
 }

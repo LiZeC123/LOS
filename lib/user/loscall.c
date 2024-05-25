@@ -139,3 +139,6 @@ void do_user_test_call() { _syscall0(SYS_TEST); }
 void make_user_prog(char *file_name, uint32_t file_size) {
   _syscall2(SYS_MKPROG, file_name, file_size);
 }
+
+// 打印分区信息
+void pp() { _syscall0(SYS_PP); }

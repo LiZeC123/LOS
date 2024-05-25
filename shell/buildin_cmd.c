@@ -284,29 +284,23 @@ int32_t buildin_rm(uint32_t argc, char **argv) {
   return ret;
 }
 
+static int str2int(char *buf, int maxLen) {
+  int count = 0;
+  int asw = 0;
+  int op = 1;
+  if (buf[count] == '-') {
+    op = -1;
+    ++count;
+  }
 
-static int str2int(char *buf, int maxLen)
-{
-    int count = 0;
-    int asw = 0;
-    int op = 1;
-    if (buf[count] == '-')
-    {
-        op = -1;
-        ++count;
-    }
+  while (buf[count] != '\n' && buf[count] != '\0' && count < maxLen) {
+    int d = buf[count] - 48;
+    asw = asw * 10 + d;
+    ++count;
+  }
 
-    while (buf[count] != '\n' && buf[count] != '\0' && count < maxLen)
-    {
-        int d = buf[count] - 48;
-        asw = asw * 10 + d;
-        ++count;
-    }
-
-    return op * asw;
+  return op * asw;
 }
-
-
 
 // 复制用户程序内建函数
 int32_t buildin_mkprog(uint32_t argc, char **argv) {
@@ -319,5 +313,17 @@ int32_t buildin_mkprog(uint32_t argc, char **argv) {
   uint32_t count = str2int(argv[2], 10);
 
   make_user_prog(final_path, count);
+  return 0;
+}
+
+// 打印分区信息
+int32_t buildin_pp(uint32_t argc, char **argv) {
+  UNUSED(argv);
+  if (argc != 1) {
+    printf("pp: only support 0 argument!\n");
+    return -1;
+  }
+
+  pp();
   return 0;
 }

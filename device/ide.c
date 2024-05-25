@@ -319,10 +319,9 @@ static void partition_scan(Disk *hd, uint32_t ext_lba) {
 static bool partition_info(ListElem *pelem, int arg) {
   UNUSED(arg);
   Partition *part = elem2entry(Partition, part_tag, pelem);
-  printk("    %s start_lba:0x%x, sec_cnt:0x%x\n", part->name, part->start_lba,
+  printk("%s start_lba:0x%x sec_cnt:0x%x\n", part->name, part->start_lba,
          part->sec_cnt);
-  // 返回 false 与函数本身功能无关
-  // 只是为了让主调函数 list_traversal 继续向下遍历元素
+  // 返回 false 继续向下遍历元素
   return false;
 }
 
@@ -330,7 +329,7 @@ static bool partition_info(ListElem *pelem, int arg) {
 void ide_init() {
   uint8_t hd_cnt = *((uint8_t *)(0x475)); // 获取硬盘的数量
   ASSERT(hd_cnt > 0);
-  // list_init(&partition_list);
+  list_init(&partition_list);
   //  一个 ide 通道上有两个硬盘, 根据硬盘数量反推有几个ide通道
   channel_cnt = DIV_ROUND_UP(hd_cnt, 2);
   IdeChannel *channel;
@@ -377,7 +376,8 @@ void ide_init() {
 
     channel_no++; // 下一个 channel
   }
-  // printk("\n  all partition info\n");
-  // // 打印所有分区信息
-  // list_traversal(&partition_list, partition_info, (int)NULL);
+}
+
+void sys_print_partition_info() {
+  list_traversal(&partition_list, partition_info, (int)NULL);
 }

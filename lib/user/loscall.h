@@ -43,7 +43,8 @@ enum SYSCALL_NR { // 用来存放子功能号
 
   SYS_STAT = 106,
   SYS_TEST,
-  SYS_MKPROG
+  SYS_MKPROG,
+  SYS_PP,
 };
 
 // SYS_RESTART
@@ -87,3 +88,4 @@ int32_t stat(const char *path, struct stat *buf);
 
 void do_user_test_call();
 void make_user_prog(char *file_name, uint32_t file_size);
+void pp();

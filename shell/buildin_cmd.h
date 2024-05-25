@@ -12,3 +12,4 @@ int32_t buildin_mkdir(uint32_t argc, char **argv);
 int32_t buildin_rmdir(uint32_t argc, char **argv);
 int32_t buildin_rm(uint32_t argc, char **argv);
 int32_t buildin_mkprog(uint32_t argc, char **argv);
+int32_t buildin_pp(uint32_t argc, char **argv);
